@@ -15,7 +15,6 @@ import {
   Clock,
   Award,
   TrendingUp,
-  Users,
   Calendar,
   Play,
   Eye,

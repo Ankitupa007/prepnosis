@@ -1,4 +1,4 @@
-import { BookOpenText, Github, Package } from "lucide-react";
+import { BookOpenText, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UserAuthState from "@/components/user-auth-state";
 import Link from "next/link";

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Calendar, Clock, Users, Trophy, BookOpen, TrendingUp, Star, Filter, Search, Play, BarChart3, Timer, Award, ChevronRight, Eye } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,7 +22,7 @@ interface GrandTest {
   total_marks: number;
   duration_minutes: number;
   negative_marking: number;
-  sections: any;
+  sections: number;
   is_active: boolean;
   created_by: string;
   created_at: string;

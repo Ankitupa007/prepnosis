@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/auth-context'
@@ -12,13 +11,9 @@ import { toast } from 'react-hot-toast'
 import {
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
-  XCircle,
   BookOpen,
-  Clock,
   Award,
   RotateCcw,
-  Circle
 } from 'lucide-react'
 import { CircleProgress } from '@/components/common/CircleProgress'
 
@@ -265,7 +260,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Test Not Found</h1>
-          <p className="text-gray-600 mb-6">The test you're looking for doesn't exist or has been removed.</p>
+          <p className="text-gray-600 mb-6">The test you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Button onClick={() => router.push('/custom-test/create')}>
             Create New Test
           </Button>
