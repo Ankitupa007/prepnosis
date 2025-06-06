@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Oswald, Geist_Mono } from "next/font/google";
+import { Oswald, Geist_Mono, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 
-const geistSans = Oswald({
+const geistSans = Inter_Tight({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GTOverflow",  
+  title: "GTOverflow",
   description:
     "Next.js 15 Supabase Starter CLI tool that bootstraps a Next.js 15 project with Supabase, React Query, and built-in authentication for rapid development. 🚀",
 };

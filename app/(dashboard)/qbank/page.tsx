@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen mx-auto w-full">
       <header className="container mx-auto py-4 px-6 flex items-center justify-between">
-        <h1 className="font-bold text-xl text-[#66C3C1]">prepnosis</h1>
+        <h1 className="font-bold text-xl text-[#66C3C1]">Q-Bank</h1>
         <div className="flex items-center gap-4">
           <UserAuthState />
         </div>
@@ -27,7 +27,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="space-x-4 my-6">
-                <HomeCTABtn/>
+                <HomeCTABtn />
               </div>
             </div>
           </div>
@@ -35,8 +35,7 @@ export default function Home() {
       </main>
       <div className=" py-6 w-full items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center mx-auto">
-          © 2023 Next.js + Supabase Starter. All rights reserved | developed by
-          Mohamed-4rarh.
+          © 2025 prepnosis. All rights reserved | developed with ❤️ by Contributers
         </p>
       </div>
     </div>

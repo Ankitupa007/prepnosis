@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -12,18 +12,12 @@ import {
   Plus,
   Search,
   BookOpen,
-  Clock,
-  Award,
-  TrendingUp,
-  Calendar,
   Play,
   Eye,
   Trash2,
-  MoreVertical,
-  Filter
+  MoreVertical
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { CircleProgress } from '@/components/common/CircleProgress'
 
 interface TestAttempt {
   id: string
@@ -59,7 +53,6 @@ export default function CustomTestPage() {
   const [filteredTests, setFilteredTests] = useState<CustomTest[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState('created_at')
   const [filterBy, setFilterBy] = useState('all')
 
   // Fetch user's custom tests
@@ -112,26 +105,14 @@ export default function CustomTestPage() {
       }
     }
 
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'title':
-          return a.title.localeCompare(b.title)
-        case 'attempts':
-          return b._count.attempts - a._count.attempts
-        case 'questions':
-          return b.total_questions - a.total_questions
-        case 'created_at':
-        default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      }
-    })
+    // Sort by most recent
+    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
     setFilteredTests(filtered)
-  }, [tests, searchTerm, sortBy, filterBy])
+  }, [tests, searchTerm, filterBy])
 
   const handleDeleteTest = async (testId: string) => {
-    if (!confirm('Are you sure you want to delete this test? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to delete this test?')) {
       return
     }
 
@@ -145,7 +126,7 @@ export default function CustomTestPage() {
       }
 
       setTests(tests.filter(test => test.id !== testId))
-      toast.success('Test deleted successfully')
+      toast.success('Test deleted')
     } catch (error) {
       console.error('Error deleting test:', error)
       toast.error('Failed to delete test')
@@ -157,22 +138,14 @@ export default function CustomTestPage() {
     return Math.max(...attempts.map(attempt => attempt.score))
   }
 
-  const getLastAttemptDate = (attempts: TestAttempt[]) => {
-    if (attempts.length === 0) return null
-    const lastAttempt = attempts.reduce((latest, current) =>
-      new Date(current.completed_at) > new Date(latest.completed_at) ? current : latest
-    )
-    return lastAttempt.completed_at
-  }
-
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+          <div className="grid gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded-lg"></div>
             ))}
           </div>
         </div>
@@ -181,168 +154,80 @@ export default function CustomTestPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Custom Tests</h1>
-          <p className="text-gray-600 mt-2">Create and manage your personalized practice tests</p>
+          <h1 className="text-2xl font-bold text-gray-900">My Tests</h1>
+          <p className="text-gray-600 text-sm mt-1">{tests.length} custom tests</p>
         </div>
         <Button
           onClick={() => router.push('/custom-test/create')}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-[#66C3C1] hover:bg-[#5ab5b3] text-white"
         >
           <Plus className="h-4 w-4" />
-          Create New Test
+          Create Test
         </Button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Tests</p>
-                <p className="text-2xl font-bold text-gray-900">{tests.length}</p>
-              </div>
-              <BookOpen className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+      {/* Search and Filter */}
+      <div className="flex gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search tests..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 border-gray-300 focus:border-[#66C3C1] focus:ring-[#66C3C1]"
+          />
+        </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Attempts</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {tests.reduce((sum, test) => sum + test._count.attempts, 0)}
-                </p>
-              </div>
-              <Play className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Attempted Tests</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {tests.filter(test => test._count.attempts > 0).length}
-                </p>
-              </div>
-              <Award className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avg Score</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {tests.length > 0
-                    ? Math.round(
-                      tests
-                        .filter(test => test.attempts.length > 0)
-                        .reduce((sum, test) => {
-                          const bestScore = getBestScore(test.attempts)
-                          return sum + (bestScore || 0)
-                        }, 0) / tests.filter(test => test.attempts.length > 0).length || 0
-                    )
-                    : 0}%
-                </p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <Select value={filterBy} onValueChange={setFilterBy}>
+          <SelectTrigger className="w-40 border-gray-300 focus:border-[#66C3C1] focus:ring-[#66C3C1]">
+            <SelectValue placeholder="Filter" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Tests</SelectItem>
+            <SelectItem value="attempted">Attempted</SelectItem>
+            <SelectItem value="not_attempted">New</SelectItem>
+            <SelectItem value="exam">Exam Mode</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Search and Filter Controls */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search tests by title or description..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <Select value={filterBy} onValueChange={setFilterBy}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Tests</SelectItem>
-                <SelectItem value="attempted">Attempted</SelectItem>
-                <SelectItem value="not_attempted">Not Attempted</SelectItem>
-                <SelectItem value="regular">Regular Mode</SelectItem>
-                <SelectItem value="exam">Exam Mode</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="created_at">Latest First</SelectItem>
-                <SelectItem value="title">Title A-Z</SelectItem>
-                <SelectItem value="attempts">Most Attempted</SelectItem>
-                <SelectItem value="questions">Most Questions</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tests Grid */}
+      {/* Tests List */}
       {filteredTests.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            {tests.length === 0 ? (
-              <div>
-                <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Custom Tests Yet</h3>
-                <p className="text-gray-600 mb-6">Create your first custom test to start practicing</p>
-                <Button
-                  onClick={() => router.push('/custom-test/create')}
-                  className="flex items-center gap-2 mx-auto"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create Your First Test
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Tests Found</h3>
-                <p className="text-gray-600">Try adjusting your search or filter criteria</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="text-center py-16">
+          {tests.length === 0 ? (
+            <div>
+              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No tests yet</h3>
+              <p className="text-gray-600 mb-6">Create your first custom test to get started</p>
+              <Button
+                onClick={() => router.push('/custom-test/create')}
+                className="bg-[#66C3C1] hover:bg-[#5ab5b3] text-white"
+              >
+                Create Your First Test
+              </Button>
+            </div>
+          ) : (
+            <div>
+              <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No tests found</h3>
+              <p className="text-gray-600">Try a different search term</p>
+            </div>
+          )}
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-3">
           {filteredTests.map((test) => (
             <TestCard
               key={test.id}
               test={test}
-              onStart={() => router.push(`/custom-test/${test.id}/attempt`)}
+              onStart={() => router.push(`/custom-test/${test.id}`)}
               onView={() => router.push(`/custom-test/${test.id}`)}
               onDelete={() => handleDeleteTest(test.id)}
               bestScore={getBestScore(test.attempts)}
-              lastAttemptDate={getLastAttemptDate(test.attempts)}
             />
           ))}
         </div>
@@ -357,152 +242,94 @@ interface TestCardProps {
   onView: () => void
   onDelete: () => void
   bestScore: number | null
-  lastAttemptDate: string | null
 }
 
-function TestCard({ test, onStart, onView, onDelete, bestScore, lastAttemptDate }: TestCardProps) {
+function TestCard({ test, onStart, onView, onDelete, bestScore }: TestCardProps) {
   const [showDropdown, setShowDropdown] = useState(false)
 
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
+    <Card className="hover:shadow-md transition-all duration-200 border-gray-200">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <Badge
-                variant={test.test_mode === 'exam' ? 'destructive' : 'secondary'}
-                className="text-xs"
-              >
-                {test.test_mode === 'exam' ? 'Exam Mode' : 'Regular Mode'}
-              </Badge>
-              {test._count.attempts > 0 && (
-                <Badge variant="outline" className="text-xs">
-                  {test._count.attempts} attempt{test._count.attempts !== 1 ? 's' : ''}
-                </Badge>
-              )}
+              <h3 className="font-medium text-gray-900 text-lg truncate">{test.title}</h3>
+              <div className="flex items-center gap-2 shrink-0">
+                {test.test_mode === 'exam' && (
+                  <Badge variant="destructive" className="text-xs px-2 py-0.5">
+                    Exam
+                  </Badge>
+                )}
+                {test._count.attempts > 0 && (
+                  <Badge variant="outline" className="text-xs px-2 py-0.5">
+                    {test._count.attempts}x
+                  </Badge>
+                )}
+                {bestScore !== null && (
+                  <Badge
+                    className="text-xs px-2 py-0.5 bg-[#66C3C1] text-white"
+                  >
+                    {bestScore}%
+                  </Badge>
+                )}
+              </div>
             </div>
-            <CardTitle className="text-lg font-semibold line-clamp-2">
-              {test.title}
-            </CardTitle>
-            {test.description && (
-              <CardDescription className="line-clamp-2 mt-1">
-                {test.description}
-              </CardDescription>
-            )}
+
+            <div className="flex items-center gap-4 text-sm text-gray-600">
+              <span className="flex items-center gap-1">
+                <BookOpen className="h-3 w-3" />
+                {test.total_questions} questions
+              </span>
+              <span>Created {formatDistanceToNow(new Date(test.created_at), { addSuffix: true })}</span>
+            </div>
           </div>
 
-          <div className="relative">
+          <div className="flex items-center gap-2 ml-4">
             <Button
-              variant="ghost"
+              onClick={onStart}
               size="sm"
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="h-8 w-8 p-0"
+              className="bg-[#66C3C1] hover:bg-[#5ab5b3] text-white"
             >
-              <MoreVertical className="h-4 w-4" />
+              <Play className="h-3 w-3 mr-1" />
+              {test._count.attempts > 0 ? 'Retake' : 'Start'}
             </Button>
 
-            {showDropdown && (
-              <div className="absolute right-0 top-8 bg-white border rounded-md shadow-lg z-10 min-w-32">
-                <button
-                  onClick={() => {
-                    onView()
-                    setShowDropdown(false)
-                  }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 text-left"
-                >
-                  <Eye className="h-4 w-4" />
-                  View Details
-                </button>
-                <button
-                  onClick={() => {
-                    onDelete()
-                    setShowDropdown(false)
-                  }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 text-red-600 text-left"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </CardHeader>
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
 
-      <CardContent className="pt-0">
-        {/* Test Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <BookOpen className="h-4 w-4" />
-            <span>{test.total_questions} questions</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Award className="h-4 w-4" />
-            <span>{test.total_marks} marks</span>
-          </div>
-        </div>
-
-        {/* Subjects */}
-        {test.subjects && test.subjects.length > 0 && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-1">
-              {test.subjects.slice(0, 3).map((subject) => (
-                <Badge key={subject.id} variant="outline" className="text-xs">
-                  {subject.name}
-                </Badge>
-              ))}
-              {test.subjects.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{test.subjects.length - 3} more
-                </Badge>
+              {showDropdown && (
+                <div className="absolute right-0 top-9 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32">
+                  <button
+                    onClick={() => {
+                      onView()
+                      setShowDropdown(false)
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 text-left"
+                  >
+                    <Eye className="h-4 w-4" />
+                    View Details
+                  </button>
+                  <button
+                    onClick={() => {
+                      onDelete()
+                      setShowDropdown(false)
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 text-red-600 text-left"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                </div>
               )}
             </div>
           </div>
-        )}
-
-        {/* Performance Info */}
-        {bestScore !== null && (
-          <div className="bg-green-50 p-3 rounded-lg mb-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-green-800">Best Score</span>
-              <CircleProgress percentage={bestScore} size={50} strokeWidth={5} color='text-green-500'/>
-            </div>
-          </div>
-        )}
-
-        {/* Last Attempt */}
-        {lastAttemptDate && (
-          <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-            <Clock className="h-3 w-3" />
-            <span>Last attempted {formatDistanceToNow(new Date(lastAttemptDate), { addSuffix: true })}</span>
-          </div>
-        )}
-
-        {/* Created Date */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-          <Calendar className="h-3 w-3" />
-          <span>Created {formatDistanceToNow(new Date(test.created_at), { addSuffix: true })}</span>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <Button
-            onClick={onStart}
-            className="flex-1 flex items-center gap-2"
-            size="sm"
-          >
-            <Play className="h-4 w-4" />
-            {test._count.attempts > 0 ? 'Retake' : 'Start Test'}
-          </Button>
-          <Button
-            onClick={onView}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Eye className="h-4 w-4" />
-            View
-          </Button>
         </div>
       </CardContent>
     </Card>

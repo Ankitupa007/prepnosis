@@ -14,7 +14,7 @@ export const CircleProgress: React.FC<CircleProgressProps> = ({
   percentage,
   size = 120,
   strokeWidth = 10,
-  color = 'text-blue-500',
+  color = 'text-[#66C3C1]',
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;

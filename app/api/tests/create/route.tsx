@@ -6,7 +6,7 @@ import { createClient } from '@/supabase/server'
 export async function POST(request: NextRequest) {
   try {
     const { numberOfQuestions, testMode, subjects, createdBy } = await request.json()
-
+    console.log(subjects, 'subjects in create test API')
     // Validate input
     if (!numberOfQuestions || !testMode || !subjects || !createdBy) {
       return NextResponse.json(
@@ -70,9 +70,9 @@ export async function POST(request: NextRequest) {
       total_questions: selectedQuestions.length,
       total_marks: selectedQuestions.length * 4, // 4 marks per question
       duration_minutes: 0, // No time limit for custom tests
-      negative_marking: 0, // No negative marking for custom tests
+      negative_marking: 0,//negative marking for custom tests is Zero
       is_active: true,
-      created_by: createdBy
+      created_by: createdBy,
     }
 
     const { data: test, error: testError } = await supabase
@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
       success: true,
       testId: test.id,
       totalQuestions: selectedQuestions.length,
+      subjects,
       message: 'Custom test created successfully'
     })
 
