@@ -38,7 +38,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const redirectTo = searchParams.get("redirect") || "/";
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -107,10 +107,10 @@ export default function LoginForm() {
             {isPending ? (
               <div className="flex items-center justify-center gap-1">
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                <span>verifing...</span>
+                <span>logging in...</span>
               </div>
             ) : (
-              "Verify Now"
+              "Login"
             )}
           </Button>
         </form>

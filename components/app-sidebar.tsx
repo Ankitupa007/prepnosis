@@ -20,9 +20,11 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Hexagon,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Image from "next/image"
 
 const navigationItems = [
   {
@@ -48,8 +50,13 @@ const navigationItems = [
   },
   {
     title: "Analytics",
-    url: "/dashboard/performance",
+    url: "/analytics",
     icon: BarChart3,
+  },
+  {
+    title: "Subject Polygons",
+    url: "/polygons",
+    icon: Hexagon,
   },
 ]
 
@@ -60,11 +67,21 @@ export function AppSidebar() {
       {/* Header */}
       <SidebarHeader className="border-b border-gray-100 px-6 py-5">
         <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-[#66C3C1] to-[#4A9B99] bg-clip-text text-transparent">
-              prepnosis
-            </h1>
-            <p className="text-xs text-gray-500">Medical Exam Prep</p>
+          <div className="flex items-center gap-2">
+            <Image
+              src={"/logo.png"}
+              alt="Prepnosis Logo"
+              width={40}
+              height={40}
+              priority
+              draggable={false}
+              loading="eager"
+              unoptimized={true}
+              fetchPriority="high"
+              style={{ objectFit: "contain" }}
+              className="h-10 w-10 object-cover"
+            />
+            {/* <h1 className="font-bold text-xl text-[#6FCCCA]">prepnosis</h1> */}
           </div>
         </div>
       </SidebarHeader>
@@ -83,8 +100,8 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      className={`hover:bg-[#66C3C1]/10 hover:text-[#66C3C1] transition-all duration-200 rounded-lg group ${isActive
-                        ? 'bg-gradient-to-r from-[#66C3C1]/20 to-[#66C3C1]/10 text-[#66C3C1] font-bold border-0 border-[#66C3C1] shadow-sm'
+                      className={`hover:bg-[#6FCCCA]/10 hover:text-[#6FCCCA] transition-all duration-200 rounded-lg group ${isActive
+                        ? 'bg-gradient-to-r from-[#6FCCCA]/20 to-[#6FCCCA]/10 text-[#6FCCCA] font-bold border-0 border-[#6FCCCA] shadow-sm'
                         : ''
                         }`}
                     >
@@ -92,7 +109,7 @@ export function AppSidebar() {
                         <item.icon className={`h-4 w-4 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'
                           }`} />
                         <span className="font-bold">{item.title}</span>
-                        {/* {isActive && (<div className="absolute right-2 w-2 h-2 bg-[#66c3c1] rounded-full"></div>)} */}
+                        {/* {isActive && (<div className="absolute right-2 w-2 h-2 bg-[#6FCCCA] rounded-full"></div>)} */}
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

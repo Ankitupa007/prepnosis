@@ -1,5 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,7 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/lib/auth-context'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 import {
   Plus,
   Search,
@@ -15,9 +23,13 @@ import {
   Play,
   Eye,
   Trash2,
-  MoreVertical
+  MoreVertical,
+  ClipboardPlus
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { SidebarTrigger } from '@/components/ui/sidebar'
+import UserAuthState from '@/components/user-auth-state'
+import ShareCodeInput from '@/components/share-code-input'
 
 interface TestAttempt {
   id: string
@@ -51,10 +63,10 @@ export default function CustomTestPage() {
   const { user } = useAuth()
   const [tests, setTests] = useState<CustomTest[]>([])
   const [filteredTests, setFilteredTests] = useState<CustomTest[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterBy, setFilterBy] = useState('all')
-
+  const [showJoinModel, setShowJoinModel] = useState<boolean>(false)
   // Fetch user's custom tests
   useEffect(() => {
     const fetchTests = async () => {
@@ -138,9 +150,24 @@ export default function CustomTestPage() {
     return Math.max(...attempts.map(attempt => attempt.score))
   }
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
+  const handleJoinTest = () => {
+    setShowJoinModel(!showJoinModel)
+  }
+  return (
+    <div className="mx-auto px-4 realtive">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
+        <div className="container mx-auto py-4 px-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger className="p-3 rounded-full w-10 h-10 bg-gray-100 hover:bg-gray-50" />
+            <div className="hidden md:block">
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <UserAuthState />
+          </div>
+        </div>
+      </header>
+      {isLoading ? (<div className="max-w-4xl mx-auto px-4 py-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid gap-4">
@@ -149,90 +176,108 @@ export default function CustomTestPage() {
             ))}
           </div>
         </div>
-      </div>
-    )
-  }
+      </div>) : (<section className='px-4 max-w-4xl mx-auto py-4'>
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8 max-w-4xl">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Custom Test</h1>
+            <p className="text-gray-600 text-sm mt-1">{tests.length} custom tests</p>
+          </div>
+          <div className='flex items-center gap-2'>
+            <Dialog>
+              <DialogTrigger className='flex items-center gap-2 border-2 bg-transparent border-[#66C3C1] hover:bg-[#5ab5b3] text-[#66c3c1] hover:text-white py-1 px-3 rounded-md'>
+                <Plus className="h-4 w-4" />
+                Join Test
+              </DialogTrigger>
+              <DialogContent className='max-w-md mx-auto px-6'>
+                <DialogHeader className='flex flex-col items-center'>
+                  <DialogTitle >Join Shared Test</DialogTitle>
+                  <DialogDescription>
+                    Enter the 8-character share code to access the test
+                  </DialogDescription>
+                  <DialogDescription className='text-xs text-gray-500'>
+                    Example: ABC12345
+                  </DialogDescription>
+                </DialogHeader>
+                <ShareCodeInput />
+              </DialogContent>
+            </Dialog>
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Tests</h1>
-          <p className="text-gray-600 text-sm mt-1">{tests.length} custom tests</p>
+            <Button
+              onClick={() => router.push('/custom-test/create')}
+              className="flex items-center gap-2 bg-[#66C3C1] hover:bg-[#5ab5b3] text-white"
+            >
+              <ClipboardPlus className="h-4 w-4" />
+              Create Test
+            </Button>
+          </div>
         </div>
-        <Button
-          onClick={() => router.push('/custom-test/create')}
-          className="flex items-center gap-2 bg-[#66C3C1] hover:bg-[#5ab5b3] text-white"
-        >
-          <Plus className="h-4 w-4" />
-          Create Test
-        </Button>
-      </div>
 
-      {/* Search and Filter */}
-      <div className="flex gap-3 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search tests..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 border-gray-300 focus:border-[#66C3C1] focus:ring-[#66C3C1]"
-          />
-        </div>
-
-        <Select value={filterBy} onValueChange={setFilterBy}>
-          <SelectTrigger className="w-40 border-gray-300 focus:border-[#66C3C1] focus:ring-[#66C3C1]">
-            <SelectValue placeholder="Filter" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Tests</SelectItem>
-            <SelectItem value="attempted">Attempted</SelectItem>
-            <SelectItem value="not_attempted">New</SelectItem>
-            <SelectItem value="exam">Exam Mode</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Tests List */}
-      {filteredTests.length === 0 ? (
-        <div className="text-center py-16">
-          {tests.length === 0 ? (
-            <div>
-              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tests yet</h3>
-              <p className="text-gray-600 mb-6">Create your first custom test to get started</p>
-              <Button
-                onClick={() => router.push('/custom-test/create')}
-                className="bg-[#66C3C1] hover:bg-[#5ab5b3] text-white"
-              >
-                Create Your First Test
-              </Button>
-            </div>
-          ) : (
-            <div>
-              <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tests found</h3>
-              <p className="text-gray-600">Try a different search term</p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredTests.map((test) => (
-            <TestCard
-              key={test.id}
-              test={test}
-              onStart={() => router.push(`/custom-test/${test.id}`)}
-              onView={() => router.push(`/custom-test/${test.id}`)}
-              onDelete={() => handleDeleteTest(test.id)}
-              bestScore={getBestScore(test.attempts)}
+        {/* Search and Filter */}
+        <div className="flex gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search tests..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-gray-300 focus:border-[#66C3C1] focus:ring-[#66C3C1]"
             />
-          ))}
+          </div>
+
+          <Select value={filterBy} onValueChange={setFilterBy}>
+            <SelectTrigger className="w-40 border-gray-300 focus:border-[#66C3C1] focus:ring-[#66C3C1]">
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tests</SelectItem>
+              <SelectItem value="attempted">Attempted</SelectItem>
+              <SelectItem value="not_attempted">New</SelectItem>
+              <SelectItem value="exam">Exam Mode</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
+
+        {/* Tests List */}
+        {filteredTests.length === 0 ? (
+          <div className="text-center py-16">
+            {tests.length === 0 ? (
+              <div>
+                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No tests yet</h3>
+                <p className="text-gray-600 mb-6">Create your first custom test to get started</p>
+                <Button
+                  onClick={() => router.push('/custom-test/create')}
+                  className="bg-[#66C3C1] hover:bg-[#5ab5b3] text-white"
+                >
+                  Create Your First Test
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No tests found</h3>
+                <p className="text-gray-600">Try a different search term</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredTests.map((test) => (
+              <TestCard
+                key={test.id}
+                test={test}
+                onStart={() => router.push(`/custom-test/${test.id}`)}
+                onView={() => router.push(`/custom-test/${test.id}`)}
+                onDelete={() => handleDeleteTest(test.id)}
+                bestScore={getBestScore(test.attempts)}
+              />
+            ))}
+          </div>
+        )}
+      </section>)}
     </div>
+
   )
 }
 

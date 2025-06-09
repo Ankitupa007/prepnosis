@@ -13,15 +13,15 @@ export default function HomeCTABtn() {
     <div className=" gap-4">
       {user ? (
         <div>
-          <Button className="w-full py-6 px-12 bg-[#66C3C1] hover:bg-[#66C3C1]/80" asChild>
-            <Link href={"/dashboard"} className="font-bold">
+          <Button className="w-full py-8 px-24 bg-[#6FCCCA] hover:bg-[#6FCCCA]/80" asChild>
+            <Link href={"/dashboard"} className="font-bold text-xl">
               Go to dashboard
             </Link>
           </Button>
         </div>
       ) : (
-        <Button className="w-full py-8 px-24 bg-[#66C3C1] hover:bg-[#66C3C1]/80" asChild>
-          <Link href={"/login"} className="text-xl">
+        <Button className="w-full py-8 px-24 bg-[#6FCCCA] hover:bg-[#6FCCCA]/80" asChild>
+          <Link href={"/login"} className="text-xl font-bold">
             Get Started
           </Link>
         </Button>

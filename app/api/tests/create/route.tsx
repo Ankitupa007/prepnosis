@@ -1,12 +1,14 @@
-// app/api/tests/create/route.ts
+// app/api/tests/create/route.ts (Updated)
 import { NextRequest, NextResponse } from 'next/server'
 import { Question } from '@/lib/types/test'
 import { createClient } from '@/supabase/server'
 
+
 export async function POST(request: NextRequest) {
   try {
-    const { numberOfQuestions, testMode, subjects, createdBy } = await request.json()
-    console.log(subjects, 'subjects in create test API')
+    const { numberOfQuestions, testMode, subjects, createdBy, enableSharing = false, shareExpiration } = await request.json()
+
+
     // Validate input
     if (!numberOfQuestions || !testMode || !subjects || !createdBy) {
       return NextResponse.json(
@@ -25,6 +27,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+    let shareCode = generateShareCode() // Generate initial share code
 
     // Build question query
     let questionQuery = supabase
@@ -58,7 +61,6 @@ export async function POST(request: NextRequest) {
     // Randomly select questions
     const shuffledQuestions = availableQuestions.sort(() => Math.random() - 0.5)
     const selectedQuestions = shuffledQuestions.slice(0, Math.min(numberOfQuestions, availableQuestions.length))
-    // console.log('Selected Questions:', selectedQuestions)
 
     // Create test record
     const testData = {
@@ -70,9 +72,11 @@ export async function POST(request: NextRequest) {
       total_questions: selectedQuestions.length,
       total_marks: selectedQuestions.length * 4, // 4 marks per question
       duration_minutes: 0, // No time limit for custom tests
-      negative_marking: 0,//negative marking for custom tests is Zero
+      negative_marking: 0, // negative marking for custom tests is Zero
       is_active: true,
       created_by: createdBy,
+      share_code: shareCode,
+      is_shareable: enableSharing // Allow sharing if requested
     }
 
     const { data: test, error: testError } = await supabase
@@ -88,7 +92,14 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
-
+    function generateShareCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+      let result = ''
+      for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length))
+      }
+      return result
+    }
     // Create test-question mappings
     const testQuestions = selectedQuestions.map((question: Question, index: number) => ({
       test_id: test.id,
@@ -117,7 +128,10 @@ export async function POST(request: NextRequest) {
       testId: test.id,
       totalQuestions: selectedQuestions.length,
       subjects,
-      message: 'Custom test created successfully'
+      shareCode: shareCode,
+      message: shareCode
+        ? 'Custom test created with share code'
+        : 'Custom test created successfully'
     })
 
   } catch (error) {

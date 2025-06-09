@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/auth-context'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,7 +22,7 @@ import {
 import { CircleProgress } from '@/components/common/CircleProgress'
 import UserAuthState from '@/components/user-auth-state'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { set } from 'date-fns'
+import CopyButton from '@/components/copy-to-clipboard'
 
 interface Question {
   id: string
@@ -62,6 +62,7 @@ interface Test {
   total_questions: number
   total_marks: number
   subjects: string[] | 'all'
+  share_code?: string
 }
 
 interface UserAnswer {
@@ -101,7 +102,6 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
         }
         const data = await response.json()
         setTest(data.test)
-        console.log(test)
         setQuestions(data.questions)
 
         // Initialize user answers
@@ -112,7 +112,6 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
         }))
         setUserAnswers(initialAnswers)
       } catch (error) {
-        console.error('Error fetching test:', error)
         toast.error('Failed to load test')
         router.push('/custom-test/create')
       } finally {
@@ -147,8 +146,10 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
     // For exam mode, never show explanation during the test
     if (test?.test_mode === 'regular' && isAnswered) {
       setShowExplanation(true)
+    } else if (test?.test_mode === 'regular' && !isAnswered && showReviewMode) {
+      setShowExplanation(true)
     } else {
-      setShowExplanation(false)
+      setShowExplanation(false) // Hide explanation if not answered or in exam mode
     }
   }
 
@@ -340,7 +341,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
               <div className="p-6 pb-4">
                 <div className="flex flex-col justify-center items-start gap-3 mb-3 w-full">
                   <div className="h-12 rounded-xl flex items-center justify-center w-full py-2">
-                    <ClipboardPlus className="w-10 h-10 text-[#66c3c1]" />
+                    <ClipboardPlus className="w-10 h-10 text-[#6FCCCA]" />
                   </div>
                   <div className="flex-1 text-center">
                     <h2 className="text-xl font-semibold text-gray-900 leading-tight">{test.title}</h2>
@@ -350,22 +351,23 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
               </div>
 
               {/* Stats */}
-              <div className="px-6 pb-4">
-                <div className="grid grid-cols-3 gap-3">
+              <div className="px-6 pb-4 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="text-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                    <div className="text-lg font-bold" style={{ color: '#66c3c1' }}>{test.total_questions}</div>
+                    <div className="text-lg font-bold" style={{ color: '#6FCCCA' }}>{test.total_questions}</div>
                     <div className="text-xs text-gray-600">Questions</div>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                    <div className="text-lg font-bold" style={{ color: '#66c3c1' }}>{test.total_marks}</div>
+                    <div className="text-lg font-bold" style={{ color: '#6FCCCA' }}>{test.total_marks}</div>
                     <div className="text-xs text-gray-600">Points</div>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                    <div className="text-lg font-bold" style={{ color: '#66c3c1' }}>
-                      <Clock className="w-4 h-4 inline" />
-                    </div>
-                    <div className="text-xs text-gray-600">Timed</div>
+                </div>
+                <div className="flex justify-between items-center  p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                  <div className="text-xs text-gray-400 ">Share</div>
+                  <div className="text-sm font-bold" style={{ color: '#6FCCCA' }}>
+                    {test.share_code || 'N/A'}
                   </div>
+                  <CopyButton text={test.share_code || ""} />
                 </div>
               </div>
 
@@ -376,8 +378,8 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                   <span
                     className="text-xs px-3 py-1 rounded-full font-medium"
                     style={{
-                      backgroundColor: test.test_mode === 'regular' ? '#66c3c120' : '#f3f4f6',
-                      color: test.test_mode === 'regular' ? '#66c3c1' : '#6b7280'
+                      backgroundColor: test.test_mode === 'regular' ? '#6FCCCA20' : '#f3f4f6',
+                      color: test.test_mode === 'regular' ? '#6FCCCA' : '#6b7280'
                     }}
                   >
                     {test.test_mode === 'regular' ? 'Regular' : 'Exam'}
@@ -395,12 +397,12 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                   ))}
                 </div> */}
               </div>
-
+              <p></p>
               {/* Start Button */}
               <div className="p-6 pt-0">
                 <button
                   onClick={startTest}
-                  className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#66C3C1] hover:bg-[#66c3c1]/70"
+                  className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
                 >
                   <Play className="w-5 h-5  transition-transform" />
                   Start Test
@@ -419,7 +421,6 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
   // Test taking interface
   const currentQuestion = questions[currentQuestionIndex]
   const currentAnswer = userAnswers.find(a => a.questionId === currentQuestion.question_id)
-  console.log(currentQuestion.questions.explanation)
 
   // Determine if we should show explanations
   const shouldShowExplanation = (test.test_mode === 'regular' && showExplanation) ||
@@ -531,10 +532,10 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {!showReviewMode ? (<button onClick={submitTest} className="text-[#66C3C1] bg-transparent shadow-none p-0">
+            {!showReviewMode ? (<button onClick={submitTest} className="text-[#6FCCCA] bg-transparent shadow-none p-0">
               Submit Test
             </button>) : (
-              <button onClick={toggleReviewMode} className="text-[#66C3C1]">
+              <button onClick={toggleReviewMode} className="text-[#6FCCCA]">
                 See results
               </button>
             )}
@@ -578,7 +579,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                       }
                       // Default answered/unanswered colors
                       return isAnswered
-                        ? 'bg-[#66C3C1] border-[#66C3C1]'
+                        ? 'bg-[#6FCCCA] border-[#6FCCCA]'
                         : 'bg-white border-gray-300 hover:border-gray-400'
                     }
 
@@ -604,7 +605,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
             <Card className='shadow-none border-none'>
               <CardHeader>
                 <CardTitle className="flex items-start gap-3 pt-0">
-                  <span className="flex-1 whitespace-pre-wrap  text-xl font-semibold">{currentQuestionIndex + 1}. {currentQuestion.questions.question_text}</span>
+                  <p className="flex-1  text-xl font-semibold">{currentQuestionIndex + 1}. {currentQuestion.questions.question_text}</p>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -637,7 +638,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                                   ? 'bg-red-50 border-none'
                                   : 'border-none bg-white shadow'
                               : isSelected
-                                ? 'bg-[#66C3C1]/30 border-none'
+                                ? 'bg-[#6FCCCA]/30 border-none'
                                 : 'bg-white shadow  border-none hover:bg-gray-100'
                               } ${isDisabled ? 'cursor-not-allowed opacity-75' : ''}`}
                           >
@@ -669,7 +670,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                   <div className='flex gap-2'>
                     <button
                       onClick={previousQuestion}
-                      className='flex items-center text-[#66C3C1] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed'
+                      className='flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed'
                       disabled={currentQuestionIndex === 0}
                     >
                       <ChevronLeft className="h-4 w-4 mr-2" />
@@ -680,20 +681,20 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                     {showReviewMode ? (
                       <button
                         onClick={nextQuestion}
-                        className='flex items-center text-[#66C3C1] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed'
+                        className='flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed'
                         disabled={currentQuestionIndex === questions.length - 1 && test.test_mode === 'regular'}
                       >
                         Next
                         <ChevronRight className="h-4 w-4 ml-2" />
                       </button>
                     ) : currentQuestionIndex === questions.length - 1 ? (
-                      <Button onClick={submitTest} className="bg-[#66C3C1] hover:bg-[#66C3C1]/60 font-bold text-white">
+                      <Button onClick={submitTest} className="bg-[#6FCCCA] hover:bg-[#6FCCCA]/60 font-bold text-white">
                         Submit Test
                       </Button>
                     ) : (
                       <button
                         onClick={nextQuestion}
-                        className='flex items-center text-[#66C3C1] bg-transparent shadow-none p-0 font-bold '
+                        className='flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold '
                         disabled={currentQuestionIndex === questions.length - 1 && test.test_mode === 'regular'}
                       >
                         Next

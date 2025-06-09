@@ -157,7 +157,6 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 });
     }
 
-    // console.log('Raw questions:', questions);
 
     // Get existing answers if any
     const { data: existingAnswers, error: answersError } = await supabase

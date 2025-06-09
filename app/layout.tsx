@@ -1,34 +1,42 @@
+// app/layout.tsx or app/root-layout.tsx
+
 import type { Metadata } from "next";
-import { Oswald, Geist_Mono, Inter_Tight } from "next/font/google";
+import { Manrope, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 
-const geistSans = Inter_Tight({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
   subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "GTOverflow",
+  title: "Prepnosis | NEET-PG & INICET Mock Tests",
   description:
-    "Next.js 15 Supabase Starter CLI tool that bootstraps a Next.js 15 project with Supabase, React Query, and built-in authentication for rapid development. 🚀",
+    "India's most elegant NEET-PG and INICET mock test platform — built with Next.js 15, Supabase, React Query, and designed for top-rankers. 🚀",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+      </head>
+      <body className={`${manrope.variable} ${geistMono.variable} font-sans antialiased`}>
         <QueryProvider>
           {children}
           <Toaster position="top-center" duration={3000} />

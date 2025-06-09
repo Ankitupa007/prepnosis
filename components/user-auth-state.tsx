@@ -18,6 +18,8 @@ import { logOut } from "@/app/(auth)/actions";
 import { Icons } from "@/components/ui/icons"; // Import spinner icon
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import LoadingSpinner from "./common/LoadingSpinner";
+import { LogIn } from "lucide-react";
 
 export default function UserAuthState() {
   const { user } = useAuth();
@@ -65,7 +67,7 @@ export default function UserAuthState() {
             <DropdownMenuItem>
               <button onClick={removeUser} disabled={isPending}>
                 {isPending ? (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingSpinner className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   "Log Out"
                 )}
@@ -75,11 +77,11 @@ export default function UserAuthState() {
         </DropdownMenu>
       ) : (
         <Link href={"/login"}>
-          <Button disabled={isPending}>
+          <Button disabled={isPending} className="p-3 rounded-full w-10 h-10 bg-gray-100 hover:bg-gray-50 flex items-center justify-center">
             {isPending ? (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              <LoadingSpinner className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              "Verify Now"
+              <LogIn className="text-black"/>
             )}
           </Button>
         </Link>

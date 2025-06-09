@@ -9,7 +9,6 @@ export async function GET(
   const { id } = await params
   const supabase = await createClient()
   try {
-    // console.log("Fetching test with ID:", id)
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -37,7 +36,8 @@ export async function GET(
         scheduled_at,
         expires_at,
         created_at,
-        created_by
+        created_by,
+        share_code
       `)
       .eq('id', id)
       .eq('is_active', true)
@@ -120,7 +120,6 @@ export async function GET(
         topic: tq.questions[0].topics
       } : null
     })) || [];
-    // console.log("transformedQuestions", transformedQuestions)
     // Check if user has already attempted this test
     const { data: attempt, error: attemptError } = await supabase
       .from('user_test_attempts')

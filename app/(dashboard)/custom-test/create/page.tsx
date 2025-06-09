@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useAuth } from '@/lib/auth-context'
-import { toast } from 'react-hot-toast'
-import { Play, Zap, Clock, ClipboardPlus } from 'lucide-react'
+import { toast } from 'sonner'
+import { Play, Zap, Clock, ClipboardPlus, Share2, Copy, Users, AlertCircle, CheckCircle } from 'lucide-react'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import UserAuthState from '@/components/user-auth-state'
 
@@ -30,11 +30,27 @@ export default function CreateCustomTest() {
   const [testMode, setTestMode] = useState<'regular' | 'exam'>('regular')
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
 
+  // New sharing state
+  const [enableSharing, setEnableSharing] = useState(true)
+  const [shareExpiration, setShareExpiration] = useState<string>('')
+  const [generatedShareCode, setGeneratedShareCode] = useState<string>('')
+  const [showShareResult, setShowShareResult] = useState(false)
+
   // Preset configurations for quick start
   const presets = [
     { questions: 10, label: 'Quick', icon: Zap, description: '10 questions' },
     { questions: 25, label: 'Standard', icon: Zap, description: '25 questions' },
-    { questions: 50, label: 'Extended', icon: Zap, description: '50 questions' }
+    { questions: 50, label: 'Extended', icon: Zap, description: '50 questions' },
+    { questions: 100, label: 'TestLike', icon: Zap, description: '100 questions' }
+  ]
+
+  // Expiration options
+  const expirationOptions = [
+    { value: '', label: 'No expiration' },
+    { value: '24', label: '24 hours' },
+    { value: '72', label: '3 days' },
+    { value: '168', label: '1 week' },
+    { value: '720', label: '1 month' }
   ]
 
   // Fetch subjects on component mount
@@ -61,6 +77,16 @@ export default function CreateCustomTest() {
     fetchSubjects()
   }, [])
 
+  // Copy share code to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Share code copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy share code')
+    }
+  }
+
   // Create custom test
   const handleCreateTest = async () => {
     if (!user) {
@@ -84,7 +110,9 @@ export default function CreateCustomTest() {
           numberOfQuestions,
           testMode,
           subjects: selectedSubjects.length === subjects.length ? 'all' : selectedSubjects,
-          createdBy: user.id
+          createdBy: user.id,
+          enableSharing,
+          shareExpiration: null, // Default to no expiration
         }),
       })
 
@@ -93,8 +121,11 @@ export default function CreateCustomTest() {
       }
 
       const result = await response.json()
-      toast.success('Test ready!')
-      router.push(`/custom-test/${result.testId}`)
+
+      if (result.shareCode) {
+        toast.success(`Test created with share code: ${result.shareCode}`)
+        router.push(`/custom-test/${result.testId}`)
+      }
     } catch (error) {
       console.error('Error creating test:', error)
       toast.error('Failed to create test. Please try again.')
@@ -102,6 +133,8 @@ export default function CreateCustomTest() {
       setIsLoading(false)
     }
   }
+
+
 
   if (loadingSubjects) {
     return (
@@ -134,13 +167,13 @@ export default function CreateCustomTest() {
           <p className="text-gray-600">Quick setup, powerful practice</p>
         </div>
 
-        <div className="space-y-2">
-          <section className='flex flex-col md:flex-row gap-6'>
+        <div className="space-y-4">
+          <section className='flex flex-col lg:flex-row gap-6'>
             {/* Quick Presets */}
             <Card className="border-none shadow-sm">
               <CardContent className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-4">Choose Test Length</h3>
-                <div className="flex flex-col  gap-3">
+                <div className="flex flex-col gap-3">
                   {presets.map((preset) => {
                     const Icon = preset.icon
                     const isSelected = numberOfQuestions === preset.questions
@@ -149,12 +182,12 @@ export default function CreateCustomTest() {
                         key={preset.questions}
                         onClick={() => setNumberOfQuestions(preset.questions)}
                         className={`px-4 py-2 rounded-xl border-2 transition-all duration-200 text-left ${isSelected
-                          ? 'bg-[#66c3c1]/20 border-[#66c3c1] text-[#66c3c1] shadow-sm'
+                          ? 'bg-[#6FCCCA]/20 border-[#6FCCCA] text-[#6FCCCA] shadow-sm'
                           : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <div className="flex items-center justify-center gap-3">
-                          <Icon className={`h-5 w-5 ${isSelected ? 'text-[#66c3c1]' : 'text-gray-500'}`} />
+                          <Icon className={`h-5 w-5 ${isSelected ? 'text-[#6FCCCA]' : 'text-gray-500'}`} />
                           <p className="text-sm text-gray-600">{preset.description}</p>
                         </div>
                       </button>
@@ -171,13 +204,13 @@ export default function CreateCustomTest() {
                 <RadioGroup
                   value={testMode}
                   onValueChange={(value) => setTestMode(value as 'regular' | 'exam')}
-                  className="grid grid-cols-1  gap-3"
+                  className="grid grid-cols-1 gap-3"
                 >
                   <Label htmlFor="regular" className="font-medium cursor-pointer text-gray-900">
-                    <div className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${testMode === 'regular' ? 'border-[#66c3c1] bg-[#66c3c1]/5' : 'border-gray-200 hover:border-gray-300'
+                    <div className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${testMode === 'regular' ? 'border-[#6FCCCA] bg-[#6FCCCA]/5' : 'border-gray-200 hover:border-gray-300'
                       }`}>
                       <div className="flex items-center space-x-3">
-                        <RadioGroupItem value="regular" id="regular" className="border-[#66c3c1] text-[#66c3c1]" />
+                        <RadioGroupItem value="regular" id="regular" className="border-[#6FCCCA] text-[#6FCCCA]" />
                         <div>
                           Regular Mode
                           <p className="text-sm text-gray-600 mt-1">
@@ -188,10 +221,10 @@ export default function CreateCustomTest() {
                     </div>
                   </Label>
                   <Label htmlFor="exam" className="font-medium cursor-pointer text-gray-900">
-                    <div className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${testMode === 'exam' ? 'border-[#66c3c1] bg-[#66c3c1]/5' : 'border-gray-200 hover:border-gray-300'
+                    <div className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${testMode === 'exam' ? 'border-[#6FCCCA] bg-[#6FCCCA]/5' : 'border-gray-200 hover:border-gray-300'
                       }`}>
                       <div className="flex items-center space-x-3">
-                        <RadioGroupItem value="exam" id="exam" className="border-[#66c3c1] text-[#66c3c1]" />
+                        <RadioGroupItem value="exam" id="exam" className="border-[#6FCCCA] text-[#6FCCCA]" />
                         <div>
                           Exam Mode
                           <p className="text-sm text-gray-600 mt-1">
@@ -205,6 +238,7 @@ export default function CreateCustomTest() {
               </CardContent>
             </Card>
           </section>
+
           {/* Subject Selection - Simplified */}
           <Card className="border-none shadow-sm">
             <CardContent className="p-6">
@@ -213,7 +247,7 @@ export default function CreateCustomTest() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setSelectedSubjects(subjects.map(s => s.id))}
-                    className="text-sm text-[#66c3c1] hover:text-[#66c3c1]/80 font-medium"
+                    className="text-sm text-[#6FCCCA] hover:text-[#6FCCCA]/80 font-medium"
                   >
                     Select All
                   </button>
@@ -241,7 +275,7 @@ export default function CreateCustomTest() {
                         }
                       }}
                       className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${isSelected
-                        ? 'bg-[#66c3c1] text-white shadow-sm'
+                        ? 'bg-[#6FCCCA] text-white shadow-sm'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
@@ -260,11 +294,11 @@ export default function CreateCustomTest() {
           </Card>
 
           {/* Start Test Button */}
-          <div className="">
+          <div>
             <Button
               onClick={handleCreateTest}
               disabled={isLoading || selectedSubjects.length === 0}
-              className="w-full  text-lg font-semibold bg-[#66c3c1] hover:bg-[#66c3c1]/90 shadow-lg"
+              className="w-full text-lg font-semibold bg-[#6FCCCA] hover:bg-[#6FCCCA]/90 shadow-lg"
               size="lg"
             >
               {isLoading ? (
@@ -275,13 +309,13 @@ export default function CreateCustomTest() {
               ) : (
                 <div className="flex items-center gap-3">
                   <ClipboardPlus className="h-5 w-5" />
-                  Create Test ({numberOfQuestions} Questions)
+                  Create Test (${numberOfQuestions} Questions)
                 </div>
               )}
             </Button>
           </div>
         </div>
       </div>
-    </div >
+    </div>
   )
 }

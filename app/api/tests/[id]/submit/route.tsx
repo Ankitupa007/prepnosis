@@ -22,7 +22,6 @@ export async function POST(
 
     const body = await request.json()
     const { attemptId, answers } = body // answers: Array of { questionId, selectedOption, isCorrect }
-    console.log("answers", answers)
 
     // Define the type for answer objects
     type Answer = {

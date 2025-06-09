@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Loader } from 'lucide-react';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -23,9 +24,9 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   return (
     <div className={cn('flex flex-col items-center justify-center space-y-2', className)}>
-      <div
+      <Loader
         className={cn(
-          'animate-spin rounded-full border-2 border-gray-300 border-t-blue-600',
+          'animate-spin text-gray-400',
           sizeClasses[size]
         )}
       />

@@ -26,7 +26,6 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // console.log('Grand tests data:', data)
 
   return NextResponse.json(data, { status: 200 })
 }

@@ -7,24 +7,27 @@ export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export type ChoiceType = 'single' | 'multiple';
 
 export interface Test {
-  id: string;
-  title: string;
-  description: string;
-  test_type: TestType;
-  test_mode: TestMode;
-  exam_pattern: ExamPattern;
-  total_questions: number;
-  total_marks: number;
-  duration_minutes: number;
-  negative_marking: number;
-  sections?: TestSection[];
-  is_active: boolean;
-  created_by: string;
-  created_at: string;
-  scheduled_at?: string;
-  expires_at?: string;
+  id: string
+  title: string
+  description?: string
+  test_type: 'custom' | 'grand_test'
+  test_mode: 'regular' | 'exam'
+  exam_pattern: 'NEET_PG' | 'INICET'
+  total_questions: number
+  total_marks: number
+  duration_minutes: number
+  negative_marking: number
+  sections?: any
+  is_active: boolean
+  created_by: string
+  created_at: string
+  scheduled_at?: string
+  expires_at?: string
+  share_code?: string
+  is_shareable: boolean
+  shared_at?: string
+  share_expires_at?: string
 }
-
 export interface TestSection {
   id: string;
   name: string;
@@ -35,21 +38,21 @@ export interface TestSection {
 }
 
 export interface Question {
-  id: string;
-  question_text: string;
-  explanation: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  correct_option: 1 | 2 | 3 | 4;
-  choice_type: ChoiceType;
-  subject_id: string;
-  topic_id: string;
-  difficulty_level: DifficultyLevel;
-  exam_types: string[];
-  is_active: boolean;
-  created_at: string;
+  id: string
+  question_text: string
+  explanation?: string
+  option_a: string
+  option_b: string
+  option_c: string
+  option_d: string
+  correct_option: number
+  choice_type: 'single' | 'multiple'
+  subject_id: string
+  topic_id: string
+  difficulty_level: 'easy' | 'medium' | 'hard'
+  exam_types: string[]
+  is_active: boolean
+  created_at: string
 }
 
 export interface TestQuestion {
