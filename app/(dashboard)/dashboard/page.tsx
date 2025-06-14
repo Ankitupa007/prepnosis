@@ -9,6 +9,7 @@ import {
   ArrowRight,
   TrendingUp,
   Calendar,
+  Hexagon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -40,28 +41,28 @@ export default function DashboardPage() {
                       <Target className="h-4 w-4 text-[#6FCCCA]" />
                       <span className="text-sm font-medium text-gray-600">Tests Taken</span>
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">24</p>
+                    <p className="text-2xl font-bold text-foreground">24</p>
                   </div>
                   <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:border-[#6FCCCA]/30 transition-colors">
                     <div className="flex items-center gap-2 mb-1">
                       <TrendingUp className="h-4 w-4 text-green-500" />
                       <span className="text-sm font-medium text-gray-600">Accuracy</span>
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">78%</p>
+                    <p className="text-2xl font-bold text-foreground">78%</p>
                   </div>
                   <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:border-[#6FCCCA]/30 transition-colors">
                     <div className="flex items-center gap-2 mb-1">
                       <Award className="h-4 w-4 text-orange-500" />
                       <span className="text-sm font-medium text-gray-600">Rank</span>
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">#156</p>
+                    <p className="text-2xl font-bold text-foreground">#156</p>
                   </div>
                   <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:border-[#6FCCCA]/30 transition-colors">
                     <div className="flex items-center gap-2 mb-1">
                       <Clock className="h-4 w-4 text-blue-500" />
                       <span className="text-sm font-medium text-gray-600">Streak</span>
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">7 days</p>
+                    <p className="text-2xl font-bold text-foreground">7 days</p>
                   </div>
                 </div>
               </div>
@@ -76,7 +77,7 @@ export default function DashboardPage() {
 
               {/* Custom Test Card */}
               <Link href="/custom-test" className="group">
-                <div className="relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-200/50 hover:border-[#6FCCCA]/30 transform hover:-translate-y-2 overflow-hidden">
+                <div className="relative bg-background rounded-2xl hover:shadow-md transition-all duration-500 p-6 border border-border hover:border-[#6FCCCA]/30 transform hover:-translate-y-2 overflow-hidden">
                   {/* Background Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#6FCCCA]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
@@ -90,17 +91,17 @@ export default function DashboardPage() {
                       </Badge>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#6FCCCA] transition-colors">
+                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-[#6FCCCA] transition-colors">
                       Custom Test
                     </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
+                    <p className="text-gray-500 mb-4 leading-relaxed">
                       Create personalized tests by selecting specific subjects and topics to focus on your weak areas.
                     </p>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <Calendar className="h-4 w-4" />
-                        <span>Customizable</span>
+                        <span>Practice subjects your way</span>
                       </div>
                       <ArrowRight className="h-5 w-5 text-[#6FCCCA] group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
@@ -109,8 +110,8 @@ export default function DashboardPage() {
               </Link>
 
               {/* Grand Tests Card */}
-              <Link href="/dashboard/questions" className="group">
-                <div className="relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-200/50 hover:border-[#6FCCCA]/30 transform hover:-translate-y-2 overflow-hidden">
+              <Link href="/grand-tests" className="group">
+                <div className="relative bg-background rounded-2xl hover:shadow-md transition-all duration-500 p-6 border border-border hover:border-orange-500/30 transform hover:-translate-y-2 overflow-hidden">
                   {/* Background Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
@@ -124,10 +125,10 @@ export default function DashboardPage() {
                       </Badge>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors">
+                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-orange-600 transition-colors">
                       Grand Tests
                     </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
+                    <p className="text-gray-500 mb-4 leading-relaxed">
                       Take comprehensive mock exams to evaluate your overall preparation and compete with peers nationwide.
                     </p>
 
@@ -144,31 +145,31 @@ export default function DashboardPage() {
 
               {/* Qbank Card */}
               <Link href="/polygons" className="group">
-                <div className="relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-200/50 hover:border-[#6FCCCA]/30 transform hover:-translate-y-2 overflow-hidden">
+                <div className="relative bg-background rounded-2xl hover:shadow-md transition-all duration-500 p-6 border border-border hover:border-blue-500/30 transform hover:-translate-y-2 overflow-hidden">
                   {/* Background Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-4">
                       <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                        <FileQuestion className="h-8 w-8" />
+                        <Hexagon className="h-8 w-8" />
                       </div>
                       <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-600">
-                        194k+ MCQs
+                        20 Subjects
                       </Badge>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
-                      Question Bank
+                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-blue-600 transition-colors">
+                      Subject Polygons
                     </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
-                      Access our extensive question bank with detailed explanations organized by subjects and topics.
+                    <p className="text-gray-500 mb-4 leading-relaxed">
+                      Visualize your strengths and weaknesses, and target your practice for maximum improvement.
                     </p>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <BookCheck className="h-4 w-4" />
-                        <span>Detailed Solutions</span>
+                        <span>Detailed Analysis</span>
                       </div>
                       <ArrowRight className="h-5 w-5 text-blue-500 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
@@ -193,7 +194,7 @@ async function UserData() {
   return (
     <div className="max-w-2xl w-full mx-auto space-y-4">
       <div className="text-center">
-        <h2 className="text-sm md:text-sm font-bold text-gray-800">
+        <h2 className="text-sm md:text-sm font-bold text-foreground">
           Welcome, {userData?.full_name || 'Student'}!
         </h2>
       </div>

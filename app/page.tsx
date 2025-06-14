@@ -1,17 +1,11 @@
-import Logo from "@/components/common/logo";
+import WebsiteHeader from "@/components/common/website-header";
 import HomeCTABtn from "@/components/home-cta-btn";
 import { Badge } from "@/components/ui/badge";
-import UserAuthState from "@/components/user-auth-state";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen mx-auto w-full">
-      <header className="container mx-auto py-4 px-6 flex items-center justify-between">
-        <Logo />
-        <div className="flex items-center gap-4">
-          <UserAuthState />
-        </div>
-      </header>
+      <WebsiteHeader />
       <main className="max-w-5xl mx-auto w-full px-4">
         <section className="w-full py-8 md:py-24 lg:py-32 xl:py-24">
           <div className="container px-4 md:px-6 mx-auto">

@@ -168,7 +168,7 @@ const GrandTestsPage = () => {
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">{test.title}</h3>
+                <h3 className="text-lg font-semibold text-foreground">{test.title}</h3>
                 {getStatusBadge(status)}
               </div>
               {test.description && (
@@ -204,7 +204,7 @@ const GrandTestsPage = () => {
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-gray-500" />
                   <span className="text-gray-600">Scheduled:</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-medium text-foreground">
                     {scheduledDateTime.date} at {scheduledDateTime.time}
                   </span>
                 </div>
@@ -225,7 +225,7 @@ const GrandTestsPage = () => {
                 <div className="flex items-center gap-3">
                   <Award className="w-5 h-5 text-yellow-600" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Your Result</p>
+                    <p className="text-sm font-medium text-foreground">Your Result</p>
                     <p className="text-xs text-gray-600">
                       {test.user_ranking ? `Rank #${test.user_ranking.rank}` : ''} •
                       Score: {test.user_attempt.total_score}/{test.total_marks}
@@ -328,11 +328,11 @@ const GrandTestsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Grand Tests</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Grand Tests</h1>
           <p className="text-gray-600">Challenge yourself with comprehensive mock tests and compete with thousands of students</p>
         </div>
 
@@ -345,7 +345,7 @@ const GrandTestsPage = () => {
                   <BookOpen className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.tests_attempted || 0}</p>
+                  <p className="text-2xl font-bold text-foreground">{stats?.tests_attempted || 0}</p>
                   <p className="text-sm text-gray-600">Tests Attempted</p>
                 </div>
               </div>
@@ -359,7 +359,7 @@ const GrandTestsPage = () => {
                   <Trophy className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.best_rank || '-'}</p>
+                  <p className="text-2xl font-bold text-foreground">{stats?.best_rank || '-'}</p>
                   <p className="text-sm text-gray-600">Best Rank</p>
                 </div>
               </div>
@@ -373,7 +373,7 @@ const GrandTestsPage = () => {
                   <TrendingUp className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.average_score || 0}%</p>
+                  <p className="text-2xl font-bold text-foreground">{stats?.average_score || 0}%</p>
                   <p className="text-sm text-gray-600">Avg. Score</p>
                 </div>
               </div>
@@ -387,7 +387,7 @@ const GrandTestsPage = () => {
                   <Users className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.registered_count || 0}</p>
+                  <p className="text-2xl font-bold text-foreground">{stats?.registered_count || 0}</p>
                   <p className="text-sm text-gray-600">Registered</p>
                 </div>
               </div>

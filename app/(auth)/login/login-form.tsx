@@ -103,7 +103,7 @@ export default function LoginForm() {
               )}
             />
           </div>
-          <Button variant={"secondary"} type="submit" className="w-full mt-8" disabled={isPending}>
+          <Button variant={"default"} type="submit" className="w-full mt-8" disabled={isPending}>
             {isPending ? (
               <div className="flex items-center justify-center gap-1">
                 <Icons.spinner className="mr-2 h-4 w-4  animate-spin" />

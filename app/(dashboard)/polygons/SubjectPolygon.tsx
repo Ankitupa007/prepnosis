@@ -108,12 +108,12 @@ const SubjectAccuracyPolygons = () => {
 
     return (
       <div
-        className={`bg-white rounded-xl p-4 shadow-sm border transition-all cursor-pointer ${isSelected ? 'border-blue-500 shadow-lg scale-105' : 'border-gray-200 hover:shadow-md'
+        className={`bg-background rounded-xl p-4 shadow-sm border transition-all cursor-pointer ${isSelected ? 'border-[#66c3c1] shadow-lg scale-105' : 'border-border hover:shadow-md'
           }`}
         onClick={onClick}
       >
         <div className="text-center mb-3">
-          <h3 className="font-semibold text-gray-900 text-sm flex items-center justify-center gap-2"><Icon className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground text-sm flex items-center justify-center gap-2"><Icon className="w-4 h-4 text-primary" />
 
           {data.subject.name}</h3>
           <p className="text-xs text-gray-500">Weightage: {data.subject.weightage}%</p>
@@ -134,7 +134,7 @@ const SubjectAccuracyPolygons = () => {
                   key={level}
                   points={gridPoints.map(p => `${p.x},${p.y}`).join(' ')}
                   fill="none"
-                  stroke="#E5E7EB"
+                  stroke="#bbbbbb"
                   strokeWidth="1"
                 />
               );
@@ -200,11 +200,11 @@ const SubjectAccuracyPolygons = () => {
 
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="text-center">
-            <p className="font-semibold text-gray-900">{data.accuracyMetrics.overall}%</p>
+            <p className="font-semibold text-foreground">{data.accuracyMetrics.overall}%</p>
             <p className="text-gray-600">Overall</p>
           </div>
           <div className="text-center">
-            <p className="font-semibold text-gray-900">{data.stats.questionsAttempted}</p>
+            <p className="font-semibold text-foreground">{data.stats.questionsAttempted}</p>
             <p className="text-gray-600">Questions</p>
           </div>
         </div>
@@ -213,8 +213,8 @@ const SubjectAccuracyPolygons = () => {
   };
 
   const DetailedView = ({ data }: { data: SubjectPolygonData }) => (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">{data.subject.name} - Detailed Analysis</h3>
+    <div className="bg-background rounded-xl p-6 shadow-sm border border-border">
+      <h3 className="text-xl font-semibold text-foreground mb-4">{data.subject.name} - Detailed Analysis</h3>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <div className="text-center p-3 bg-blue-50 rounded-lg">
@@ -236,31 +236,31 @@ const SubjectAccuracyPolygons = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Performance Breakdown</h4>
+          <h4 className="font-medium text-foreground mb-3">Performance Breakdown</h4>
           <div className="space-y-2">
             {Object.entries(data.accuracyMetrics).map(([key, value]) => (
               <div key={key} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-                <span className="font-medium text-gray-900">{value}%</span>
+                <span className="font-medium text-foreground">{value}%</span>
               </div>
             ))}
           </div>
         </div>
 
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Study Statistics</h4>
+          <h4 className="font-medium text-foreground mb-3">Study Statistics</h4>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Questions Attempted</span>
-              <span className="font-medium text-gray-900">{data.stats.questionsAttempted}</span>
+              <span className="font-medium text-foreground">{data.stats.questionsAttempted}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Topics Studied</span>
-              <span className="font-medium text-gray-900">{data.stats.topicsStudied}</span>
+              <span className="font-medium text-foreground">{data.stats.topicsStudied}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Test Questions</span>
-              <span className="font-medium text-gray-900">{data.stats.testQuestions}</span>
+              <span className="font-medium text-foreground">{data.stats.testQuestions}</span>
             </div>
           </div>
         </div>
@@ -283,7 +283,7 @@ const SubjectAccuracyPolygons = () => {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Subject Performance Polygons</h2>
+              <h2 className="text-2xl font-bold text-foreground">Subject Performance Polygons</h2>
               <p className="text-gray-600">Visual analysis of your accuracy across all MBBS subjects</p>
             </div>
             <select
@@ -310,32 +310,32 @@ const SubjectAccuracyPolygons = () => {
               />
             ))}
           </div>
-        
+
           {/* Detailed View */}
           {selectedData && <DetailedView data={selectedData} />}
 
           {/* Legend */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-4">Understanding Your Polygons</h3>
+          <div className="bg-background rounded-xl p-6 shadow-sm border border-border">
+            <h3 className="font-semibold text-foreground mb-4">Understanding Your Polygons</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="flex items-center space-x-3">
                 <div className="w-4 h-4 bg-green-500 rounded"></div>
                 <div>
-                  <p className="font-medium text-gray-900">Excellent (80%+)</p>
+                  <p className="font-medium text-foreground">Excellent (80%+)</p>
                   <p className="text-sm text-gray-600">Strong performance</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-4 h-4 bg-yellow-500 rounded"></div>
                 <div>
-                  <p className="font-medium text-gray-900">Good (60-79%)</p>
+                  <p className="font-medium text-foreground">Good (60-79%)</p>
                   <p className="text-sm text-gray-600">Above average</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-4 h-4 bg-red-500 rounded"></div>
                 <div>
-                  <p className="font-medium text-gray-900">Needs Work below (60%)</p>
+                  <p className="font-medium text-foreground">Needs Work below (60%)</p>
                   <p className="text-sm text-gray-600">Focus area</p>
                 </div>
               </div>
