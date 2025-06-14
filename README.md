@@ -311,24 +311,4 @@ This platform is built upon solid research foundations:
 
 ---
 
-<div align="center">
-  <h3>📞 Get In Touch</h3>
-  
-  <p>
-    <a href="https://github.com/yourusername/prepnosis/issues">🐛 Report Issues</a> •
-    <a href="https://github.com/yourusername/prepnosis/discussions">💬 Discussions</a> •
-    <a href="mailto:contact@prepnosis.com">📧 Contact Us</a>
-  </p>
-
-  <p>
-    <strong>Built with ❤️ for medical aspirants</strong>
-  </p>
-  
-  <p>
-    <img src="https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge" alt="Made with love"/>
-  </p>
-</div>
-
----
-
 **⭐ If you find Prepnosis helpful, please consider giving it a star on GitHub! ⭐**
