@@ -66,18 +66,6 @@ Prepnosis transforms the traditional approach to medical exam preparation by pro
 
 </details>
 
-### 🧠 **Smart Retention Tools**
-
-```mermaid
-graph TD
-    A[Take Test] --> B[Review Results]
-    B --> C[Bookmark Difficult Questions]
-    C --> D[Add Personal Notes]
-    D --> E[Reattempt Bookmarked Questions]
-    E --> F[Track Improvement]
-    F --> A
-```
-
 ### 🎮 **Engagement Features**
 
 - **🏆 Leaderboards**: Public ranking for grand tests and cumulative performance
