@@ -151,9 +151,24 @@ graph TD
 
 ---
 
-## 📋 Question Format
+## 📋 Question Dataset & Format
 
-Questions in Prepnosis follow a standardized schema for consistency:
+### 📚 **Data Source**
+
+Prepnosis utilizes the comprehensive **MedMCQA dataset** for high-quality medical MCQs:
+
+> **🏥 [MedMCQA Dataset](https://github.com/medmcqa/medmcqa)**  
+> *A large-scale, Multiple-Choice Question Answering (MCQA) dataset designed to address real-world medical entrance exam questions.*
+
+**Dataset Highlights:**
+- **194k+ High-Quality Questions** covering 2,400+ healthcare topics
+- **Aligned with AIIMS & NEET-PG** examination patterns
+- **21 Medical Subjects** with detailed explanations
+- **Expert-Curated Content** from medical professionals
+
+### 📝 **Question Schema**
+
+Questions in Prepnosis follow the MedMCQA standardized format:
 
 ```json
 {
@@ -170,6 +185,16 @@ Questions in Prepnosis follow a standardized schema for consistency:
   "choice_type": "multi"
 }
 ```
+
+### 📊 **Dataset Statistics**
+
+| Metric | Count |
+|--------|--------|
+| **Total Questions** | 194,000+ |
+| **Medical Subjects** | 21 |
+| **Healthcare Topics** | 2,400+ |
+| **Question Types** | Single/Multiple Choice |
+| **Languages** | English |
 
 ---
 
@@ -247,9 +272,42 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎉 Acknowledgments
 
-- Medical students and educators who provided feedback
-- Open source community for amazing tools and libraries
-- Contributors who help make this platform better every day
+### 📚 **Special Thanks to MedMCQA**
+
+We extend our heartfelt gratitude to the **MedMCQA team** for providing the comprehensive medical question dataset that powers Prepnosis:
+
+> **🏥 [MedMCQA: A Large-scale Multi-Subject Multi-Choice Dataset for Medical domain Question Answering](https://github.com/medmcqa/medmcqa)**
+
+**Citation:**
+```bibtex
+@article{pal2022medmcqa,
+  title={MedMCQA: A Large-scale Multi-Subject Multi-Choice Dataset for Medical domain Question Answering},
+  author={Pal, Ankit and Umapathi, Logesh Kumar and Sankarasubbu, Malaikannan},
+  journal={arXiv preprint arXiv:2203.14371},
+  year={2022}
+}
+```
+
+**Key Contributors:**
+- **Ankit Pal** - Dataset Creation & Curation
+- **Logesh Kumar Umapathi** - Data Processing & Validation  
+- **Malaikannan Sankarasubbu** - Research Supervision
+
+### 🙏 **Additional Acknowledgments**
+
+- **Medical Students & Educators** who provided valuable feedback during development
+- **Open Source Community** for amazing tools and libraries that make this platform possible
+- **Healthcare Professionals** who validated question accuracy and explanations
+- **Beta Testers** who helped identify bugs and suggest improvements
+- **Contributors** who help make this platform better every day
+
+### 📖 **Research & References**
+
+This platform is built upon solid research foundations:
+
+- **MedMCQA Research Paper**: [arXiv:2203.14371](https://arxiv.org/abs/2203.14371)
+- **Dataset Repository**: [github.com/medmcqa/medmcqa](https://github.com/medmcqa/medmcqa)
+- **Medical Education Research**: Various studies on computer-assisted medical education
 
 ---
 
