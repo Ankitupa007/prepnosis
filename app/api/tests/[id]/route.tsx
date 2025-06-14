@@ -98,11 +98,20 @@ export async function GET(
     }
     // Transform the data to match the expected format
     // Transform the data to match the expected format
+    const subjects = Array.from(
+      new Map(testQuestions
+        .flatMap(tq => (tq.questions ?? []))
+        .flatMap(question => question.subjects ?? [])
+        .filter(Boolean)
+        .map(subject => [subject.id, subject])
+      ).values()
+    )
     const transformedQuestions = testQuestions?.map(tq => ({
       id: tq.id,
       question_id: tq.question_id,
       question_order: tq.question_order,
       marks: tq.marks,
+      subjects: subjects,
       section_number: tq.section_number,
       question: tq.questions && tq.questions.length > 0 ? {
         id: tq.id, // Also incorrect, should be tq.questions.id
@@ -138,7 +147,8 @@ export async function GET(
     return NextResponse.json({
       test: {
         ...test,
-        user_attempt: attempt
+        user_attempt: attempt,
+        subjects: subjects
       },
       questions: testQuestions
     })

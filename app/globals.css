@@ -2,82 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
+    --radius: 0.625rem;
+
+    /* Light Theme - Optimized for #66c3c1 brand */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --foreground: 215 25% 15%;
+    --card: 210 20% 98%;
+    --card-foreground: 215 25% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary uses your brand color */
+    --primary: 178 36% 58%;
+    /* #66c3c1 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary complements the brand color */
+    --secondary: 210 25% 95%;
+    --secondary-foreground: 215 25% 20%;
+
+    /* Muted backgrounds with subtle tint */
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent slightly different from secondary */
+    --accent: 185 25% 94%;
+    --accent-foreground: 215 25% 20%;
+
+    /* Warmer destructive for better UX */
+    --destructive: 0 75% 58%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    --sidebar-background: 0 0% 98%;
+
+    /* Softer borders */
+    --border: 210 20% 88%;
+    --input: 210 20% 90%;
+    --ring: 178 36% 58%;
+    /* Brand color for focus rings */
+
+    /* Chart colors that work well with brand */
+    --chart-1: 178 36% 58%;
+    /* Your brand color */
+    --chart-2: 200 45% 48%;
+    /* Complementary blue */
+    --chart-3: 160 40% 45%;
+    /* Complementary green */
+    --chart-4: 45 70% 60%;
+    /* Warm accent */
+    --chart-5: 280 45% 55%;
+    /* Purple accent */
+
+    /* Enhanced sidebar with brand integration */
+    --sidebar-background: 210 25% 98%;
+    --sidebar-foreground: 215 20% 25%;
+    --sidebar-primary: 178 36% 58%;
+    /* Brand color */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 185 25% 94%;
+    --sidebar-accent-foreground: 215 25% 20%;
+    --sidebar-border: 210 20% 88%;
+    --sidebar-ring: 178 36% 58%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    /* Dark Theme - Optimized for #66c3c1 brand */
+    --background: 215 25% 6%;
+    --foreground: 210 20% 95%;
+    --card: 215 25% 8%;
+    --card-foreground: 210 20% 95%;
+    --popover: 215 25% 8%;
+    --popover-foreground: 210 20% 95%;
+
+    /* Primary brand color adjusted for dark mode */
+    --primary: 178 40% 65%;
+    /* Slightly brighter #66c3c1 for dark mode */
+    --primary-foreground: 215 25% 10%;
+
+    /* Secondary with proper contrast */
+    --secondary: 215 20% 15%;
+    --secondary-foreground: 210 15% 90%;
+
+    /* Muted with subtle warmth */
+    --muted: 215 20% 13%;
+    --muted-foreground: 210 15% 65%;
+
+    /* Accent slightly different from secondary */
+    --accent: 180 15% 16%;
+    --accent-foreground: 210 15% 90%;
+
+    /* Softer destructive for dark mode */
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    --sidebar-background: 240 5.9% 10%;
+
+    /* Borders with subtle contrast */
+    --border: 215 20% 18%;
+    --input: 215 20% 16%;
+    --ring: 178 40% 65%;
+    /* Brand color for focus rings */
+
+    /* Dark mode chart colors */
+    --chart-1: 178 40% 65%;
+    /* Your brand color */
+    --chart-2: 200 50% 60%;
+    /* Brighter blue for dark mode */
+    --chart-3: 160 45% 55%;
+    /* Brighter green for dark mode */
+    --chart-4: 45 75% 65%;
+    /* Warm accent */
+    --chart-5: 280 50% 65%;
+    /* Purple accent */
+
+    /* Enhanced dark sidebar */
+    --sidebar-background: 215 25% 8%;
+    --sidebar-foreground: 210 15% 85%;
+    --sidebar-primary: 178 40% 65%;
+    /* Brand color */
+    --sidebar-primary-foreground: 215 25% 10%;
+    --sidebar-accent: 180 15% 16%;
+    --sidebar-accent-foreground: 210 15% 85%;
+    --sidebar-border: 215 20% 18%;
+    --sidebar-ring: 178 40% 65%;
   }
 }
 

@@ -4,17 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-
   try {
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
     const body = await request.json()
     const {
       exam_pattern = 'NEET_PG',
@@ -27,31 +17,49 @@ export async function POST(request: NextRequest) {
       NEET_PG: {
         total: 200,
         subjects: {
-          'anat': 12,
-          'physio': 12,
-          'biochem': 12,
-          'patho': 15,
-          'pharma': 12,
-          'micro': 12,
-          'fmt': 8,
-          'psm': 12,
+          'anat': 17,
+          'physio': 17,
+          'biochem': 16,
+          'patho': 25,
+          'pharma': 20,
+          'micro': 20,
+          'fmt': 10,
+          'psm': 25,
           'medicine': 25,
+          'psychiatry': 10,
+          'derma': 10,
           'surgery': 25,
-          'obgy': 20,
-          'peds': 20,
-          'ortho': 8,
-          'ent': 7
+          'radio': 5,
+          'anaesthesia': 5,
+          'ortho': 10,
+          'obgy': 30,
+          'peds': 10,
+          'ent': 10,
+          'ophtha': 10,
         }
       },
       INICET: {
-        total: 100,
+        total: 200,
         subjects: {
-          'medicine': 30,
-          'surgery': 25,
-          'obgy': 15,
-          'peds': 15,
-          'psm': 10,
-          'ortho': 5
+          'anat': 11,
+          'physio': 10,
+          'biochem': 10,
+          'patho': 16,
+          'pharma': 15,
+          'micro': 14,
+          'fmt': 6,
+          'psm': 14,
+          'medicine': 22,
+          'psychiatry': 4,
+          'derma': 5,
+          'surgery': 17,
+          'radio': 8,
+          'anaesthesia': 5,
+          'ortho': 6,
+          'obgy': 16,
+          'peds': 10,
+          'ent': 5,
+          'ophtha': 6,
         }
       }
     }
@@ -84,6 +92,9 @@ export async function POST(request: NextRequest) {
       day: 'numeric'
     })}`
 
+    const markingForEachQuestion = exam_pattern === 'NEET_PG' ? 4 : 1
+    const negetiveMarking = exam_pattern === 'NEET_PG' ? 1 : 0.33
+
     // Create the grand test
     const { data: test, error: testError } = await supabase
       .from('tests')
@@ -94,14 +105,13 @@ export async function POST(request: NextRequest) {
         test_mode: 'exam',
         exam_pattern,
         total_questions: pattern.total,
-        total_marks: pattern.total * 4,
+        total_marks: pattern.total * markingForEachQuestion,
         duration_minutes,
-        negative_marking: 1.0,
+        negative_marking: negetiveMarking,
         scheduled_at: scheduled_date,
         expires_at: scheduled_date ?
           new Date(new Date(scheduled_date).getTime() + 24 * 60 * 60 * 1000).toISOString() :
           null,
-        created_by: user.id
       })
       .select()
       .single()
@@ -164,7 +174,7 @@ export async function POST(request: NextRequest) {
           test_id: test.id,
           question_id: question.id,
           question_order: questionOrder++,
-          marks: 4,
+          marks: markingForEachQuestion,
           section_number: 1
         })
       })
@@ -195,7 +205,7 @@ export async function POST(request: NextRequest) {
       .from('tests')
       .update({
         total_questions: allTestQuestions.length,
-        total_marks: allTestQuestions.length * 4
+        total_marks: allTestQuestions.length * markingForEachQuestion
       })
       .eq('id', test.id)
       .select()

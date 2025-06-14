@@ -77,11 +77,11 @@ export default function UserAuthState() {
         </DropdownMenu>
       ) : (
         <Link href={"/login"}>
-          <Button disabled={isPending} className="p-3 rounded-full w-10 h-10 bg-gray-100 hover:bg-gray-50 flex items-center justify-center">
+          <Button variant={"secondary"} disabled={isPending} className="p-3 shadow-none rounded-full w-10 h-10 flex items-center justify-center">
             {isPending ? (
               <LoadingSpinner className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <LogIn className="text-black"/>
+              <LogIn />
             )}
           </Button>
         </Link>

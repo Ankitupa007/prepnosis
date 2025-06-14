@@ -30,12 +30,6 @@ const signupSchema = z.object({
 
   email: z.string().email({ message: "Invalid email format" }),
 
-  phone: z
-    .string()
-    .regex(/^\d+$/, { message: "Phone number must contain only digits" })
-    .min(10, { message: "Phone number must be at least 10 digits" })
-    .max(15, { message: "Phone number can't exceed 15 digits" }),
-
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters long" })
@@ -57,7 +51,6 @@ export default function RegisterForm() {
     defaultValues: {
       name: "",
       email: "",
-      phone: "",
       password: "",
     },
   });
@@ -96,7 +89,7 @@ export default function RegisterForm() {
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="my name is..."
+                        placeholder="Arthur Morgan"
                         {...field}
                         disabled={isPending}
                       />
@@ -114,23 +107,6 @@ export default function RegisterForm() {
                     <FormControl>
                       <Input
                         placeholder="example@mail.com"
-                        {...field}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pnone</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="+123456789"
                         {...field}
                         disabled={isPending}
                       />
@@ -162,10 +138,10 @@ export default function RegisterForm() {
               {isPending ? (
                 <div className="flex items-center justify-center gap-1">
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  <span>Becomming a member...</span>
+                  <span>Creating account...</span>
                 </div>
               ) : (
-                "Become a member"
+                "Create an Account"
               )}
             </Button>
           </form>

@@ -1,72 +1,46 @@
 // lib/hooks/useTests.ts
-
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Test,
-  UserTestAttempt,
-  TestRanking,
-  TestAttemptWithDetails,
-  TestStats
-} from '@/lib/types/test';
+import { deleteCustomTest, fetchUserTests } from '@/lib/actions/custom-test';
 import { useAuth } from '@/lib/auth-context';
+import {
+  CustomTest, CustomTestsResponse,
+  Test,
+  UseCustomTestsReturn,
+  UserTestAttempt
+} from '@/lib/types/test';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-interface UseTestsReturn {
-  // Tests
-  tests: Test[];
-  grandTests: Test[];
-  customTests: Test[];
-  isLoadingTests: boolean;
-  testsError: Error | null;
-
-  // Test operations
-  createTest: (testData: Partial<Test>) => Promise<Test>;
-  updateTest: (id: string, testData: Partial<Test>) => Promise<Test>;
-  deleteTest: (id: string) => Promise<void>;
-
-  // Test attempts
-  startTest: (testId: string) => Promise<{ attemptId: string }>;
-  submitTest: (attemptId: string, answers: any[]) => Promise<UserTestAttempt>;
-  getUserAttempts: (testId?: string) => UserTestAttempt[];
-  getUserAttemptForTest: (testId: string) => UserTestAttempt | undefined;
-
-  // Rankings and stats
-  getTestRankings: (testId: string) => TestRanking[];
-  getTestStats: (testId: string) => TestStats | null;
-
-  // Utility functions
-  getTestById: (testId: string) => Test | undefined;
-  refetchTests: () => void;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
+// Query keys factory
+const testsKeys = {
+  all: ['tests'] as const,
+  user: (userId: string) => [...testsKeys.all, 'user', userId] as const,
+  userAttempts: (userId: string) => ['user-attempts', userId] as const,
 }
 
-export function useTests(): UseTestsReturn {
+
+export function useCustomTests(): UseCustomTestsReturn {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Fetch all tests
+  // Fetch user's custom tests
   const {
-    data: tests = [],
-    isLoading: isLoadingTests,
-    error: testsError,
-    refetch: refetchTests
+    data: userCustomTestsData,
+    isLoading: isLoadingCustomTests,
+    error: customTestsError,
+    refetch: refetchCustomTests
   } = useQuery({
-    queryKey: ['tests'],
-    queryFn: async () => {
-      const response = await fetch('/api/tests');
-      if (!response.ok) {
-        throw new Error('Failed to fetch tests');
-      }
-      return response.json();
-    },
-    enabled: !!user,
+    queryKey: testsKeys.user(user?.id || ''),
+    queryFn: () => fetchUserTests(user!.id),
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  const customTests: CustomTest[] = userCustomTestsData?.tests || [];
 
   // Fetch user test attempts
   const { data: userAttempts = [] } = useQuery({
-    queryKey: ['user-attempts', user?.id],
+    queryKey: testsKeys.userAttempts(user?.id || ''),
     queryFn: async () => {
       const response = await fetch('/api/tests/attempts');
       if (!response.ok) {
@@ -78,7 +52,7 @@ export function useTests(): UseTestsReturn {
   });
 
   // Create test mutation
-  const createTestMutation = useMutation({
+  const createCustomTestMutation = useMutation({
     mutationFn: async (testData: Partial<Test>) => {
       const response = await fetch('/api/tests/create', {
         method: 'POST',
@@ -96,11 +70,12 @@ export function useTests(): UseTestsReturn {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tests'] });
+      queryClient.invalidateQueries({ queryKey: testsKeys.user(user!.id) });
     },
   });
 
   // Update test mutation
-  const updateTestMutation = useMutation({
+  const updateCustomTestMutation = useMutation({
     mutationFn: async ({ id, testData }: { id: string; testData: Partial<Test> }) => {
       const response = await fetch(`/api/tests/${id}`, {
         method: 'PUT',
@@ -118,27 +93,35 @@ export function useTests(): UseTestsReturn {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tests'] });
+      queryClient.invalidateQueries({ queryKey: testsKeys.user(user!.id) });
     },
   });
 
-  // Delete test mutation
-  const deleteTestMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/tests/${id}`, {
-        method: 'DELETE',
-      });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete test');
-      }
+  // Delete custom test mutation
+  const deleteCustomTestMutation = useMutation({
+    mutationFn: deleteCustomTest,
+    onSuccess: (_, deletedTestId) => {
+      // Optimistically update the cache
+      queryClient.setQueryData(
+        testsKeys.user(user!.id),
+        (oldData: CustomTestsResponse | undefined) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            tests: oldData.tests.filter(test => test.id !== deletedTestId)
+          }
+        }
+      )
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tests'] });
-    },
+    onError: () => {
+      // Invalidate and refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: testsKeys.user(user!.id) })
+    }
   });
 
   // Start test mutation
-  const startTestMutation = useMutation({
+  const startCustomTestMutation = useMutation({
     mutationFn: async (testId: string) => {
       const response = await fetch(`/api/tests/${testId}/start`, {
         method: 'POST',
@@ -154,12 +137,12 @@ export function useTests(): UseTestsReturn {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-attempts'] });
+      queryClient.invalidateQueries({ queryKey: testsKeys.userAttempts(user!.id) });
     },
   });
 
   // Submit test mutation
-  const submitTestMutation = useMutation({
+  const submitCustomTestMutation = useMutation({
     mutationFn: async ({ attemptId, answers }: { attemptId: string; answers: any[] }) => {
       const response = await fetch(`/api/tests/${attemptId}/submit`, {
         method: 'POST',
@@ -176,14 +159,15 @@ export function useTests(): UseTestsReturn {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-attempts'] });
+      queryClient.invalidateQueries({ queryKey: testsKeys.userAttempts(user!.id) });
       queryClient.invalidateQueries({ queryKey: ['test-rankings'] });
+      queryClient.invalidateQueries({ queryKey: testsKeys.user(user!.id) }); // Update custom tests too
     },
   });
 
-  // Get test by ID
-  const getTestById = (testId: string): Test | undefined => {
-    return tests.find((test: Test) => test.id === testId);
+  // Get custom test by ID
+  const getCustomTestById = (testId: string): CustomTest | undefined => {
+    return customTests.find((test: CustomTest) => test.id === testId);
   };
 
   // Get user attempt for a test
@@ -191,22 +175,6 @@ export function useTests(): UseTestsReturn {
     return userAttempts.find((attempt: UserTestAttempt) => attempt.test_id === testId);
   };
 
-  // Filter tests by type
-  const grandTests = tests.filter((test: Test) => test.test_type === 'grand_test');
-  const customTests = tests.filter((test: Test) => test.test_type === 'custom');
-
-  // Get test rankings
-  const getTestRankings = (testId: string): TestRanking[] => {
-    // This would typically be a separate query, but for now return empty array
-    // You can implement this as a separate useQuery hook
-    return [];
-  };
-
-  // Get test stats
-  const getTestStats = (testId: string): TestStats | null => {
-    // This would typically be a separate query
-    return null;
-  };
 
   // Get user attempts (optionally filtered by test)
   const getUserAttempts = (testId?: string): UserTestAttempt[] => {
@@ -218,35 +186,30 @@ export function useTests(): UseTestsReturn {
 
   return {
     // Tests data
-    tests,
-    grandTests,
     customTests,
-    isLoadingTests,
-    testsError,
-
+    isLoadingCustomTests,
+    customTestsError,
+    refetchCustomTests,
     // Test operations
-    createTest: createTestMutation.mutateAsync,
-    updateTest: (id: string, testData: Partial<Test>) =>
-      updateTestMutation.mutateAsync({ id, testData }),
-    deleteTest: deleteTestMutation.mutateAsync,
+    createCustomTest: createCustomTestMutation.mutateAsync,
+    updateCustomTest: (id: string, testData: Partial<Test>) =>
+      updateCustomTestMutation.mutateAsync({ id, testData }),
+    deleteCustomTest: deleteCustomTestMutation.mutateAsync,
 
     // Test attempts
-    startTest: startTestMutation.mutateAsync,
-    submitTest: (attemptId: string, answers: any[]) =>
-      submitTestMutation.mutateAsync({ attemptId, answers }),
+    startCustomTest: startCustomTestMutation.mutateAsync,
+    submitCustomTest: (attemptId: string, answers: any[]) =>
+      submitCustomTestMutation.mutateAsync({ attemptId, answers }),
     getUserAttempts,
 
     // Rankings and stats
-    getTestRankings,
-    getTestStats,
 
     // Utility functions
-    getTestById,
+    getCustomTestById,
     getUserAttemptForTest,
-    refetchTests,
-    isCreating: createTestMutation.isPending,
-    isUpdating: updateTestMutation.isPending,
-    isDeleting: deleteTestMutation.isPending,
+    isCreatingCustomTest: createCustomTestMutation.isPending,
+    isUpdatingCustomTest: updateCustomTestMutation.isPending,
+    isDeletingCustomTest: deleteCustomTestMutation.isPending,
   };
 }
 

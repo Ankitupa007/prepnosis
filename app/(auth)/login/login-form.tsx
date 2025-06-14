@@ -103,10 +103,10 @@ export default function LoginForm() {
               )}
             />
           </div>
-          <Button type="submit" className="w-full mt-8" disabled={isPending}>
+          <Button variant={"secondary"} type="submit" className="w-full mt-8" disabled={isPending}>
             {isPending ? (
               <div className="flex items-center justify-center gap-1">
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                <Icons.spinner className="mr-2 h-4 w-4  animate-spin" />
                 <span>logging in...</span>
               </div>
             ) : (
@@ -136,7 +136,7 @@ export default function LoginForm() {
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <Button variant="outline" disabled={isPending}>
           {isPending ? (
             <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -145,14 +145,7 @@ export default function LoginForm() {
           )}{" "}
           Google
         </Button>
-        <Button variant="outline" disabled={isPending}>
-          {isPending ? (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.gitHub className="mr-2 h-4 w-4" />
-          )}{" "}
-          GitHub
-        </Button>
+
       </div>
     </div>
   );

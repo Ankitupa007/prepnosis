@@ -71,7 +71,7 @@ interface UserAnswer {
   isCorrect?: boolean
 }
 
-export default function CustomTestPage({ params }: { params: Promise<{ id: string }> }) {
+export default function CustomTestQuestionsScreen({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const { user } = useAuth()
   const [test, setTest] = useState<Test | null>(null)
@@ -220,7 +220,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
 
   // Submit test
   const submitTest = async () => {
-    if (!attemptId || !test) return
+    if (!attemptId || !test) return console.log("problem")
     try {
       const response = await fetch(`/api/tests/${test.id}/submit`, {
         method: 'POST',
@@ -292,7 +292,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
       <div className="container mx-auto">
         <UserHeader text="Start Test" />
         <div className=' min-h-[70vh] flex items-center justify-center'>
-          <LoadingSpinner text='Loading test' />
+          <LoadingSpinner text='Loading Questions' />
         </div>
       </div>
     )
@@ -302,7 +302,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Test Not Found</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Questions Not Found</h1>
           <p className="text-gray-600 mb-6">The test you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Button onClick={() => router.push('/custom-test/create')}>
             Create New Test
@@ -312,115 +312,6 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
     )
   }
 
-
-  // Test start screen
-  if (!testStarted) {
-    return (
-      <div className="container mx-auto">
-        <UserHeader text="Start Test" />
-        <div className="max-w-2xl mx-auto py-4">
-          <div className="max-w-2xl mx-auto p-6">
-            <div
-              className="bg-card rounded-2xl border border-border overflow-hidden transition-all duration-300"
-            >
-              {/* Header */}
-              <div className="p-6 pb-4">
-                <div className="flex flex-col justify-center items-center gap-3 mb-3 w-full">
-                  <div className="h-12 rounded-xl flex items-center justify-center w-full py-2">
-                    <ClipboardPlus className="w-10 h-10 text-[#6FCCCA]" />
-                  </div>
-                  <div className="flex justify-center flex-col items-center">
-                    <h2 className="text-xl font-semibold  leading-tight">{test.title}</h2>
-                    <p className="text-sm text-gray-500 mt-1">{test.description}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="px-6 pb-4 space-y-3">
-                <div className="">
-                  <div className='flex flex-wrap py-4 gap-3'>
-                    {Array.isArray(test.subjects)
-                      ? test.subjects.map((s: any) => (
-                        <Badge variant={"secondary"} key={s.id} className='text-xs rounded-full items-center justify-center py-1 flex gap-2'>
-                          <SubjectIcons subjectName={s.name} styles="w-3 h-3" />
-                          {s.name}
-                        </Badge>
-                      ))
-                      : test.subjects === 'all'
-                        ? <Badge variant="secondary" className='text-xs rounded-full items-center justify-center py-1 flex gap-2'>All Subjects</Badge>
-                        : null
-                    }
-                    {/* {test.subjects} */}
-                  </div>
-                </div>
-
-              </div>
-              {/* Stats */}
-              <div className="px-6 pb-4 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center p-3 bg-secondary rounded-xl">
-                    <div className="text-lg font-bold" style={{ color: '#6FCCCA' }}>{test.total_questions}</div>
-                    <div className="text-xs text-gray-600">Questions</div>
-                  </div>
-                  <div className="text-center p-3 bg-secondary rounded-xl">
-                    <div className="text-lg font-bold" style={{ color: '#6FCCCA' }}>{test.total_marks}</div>
-                    <div className="text-xs text-gray-600">Points</div>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center  text-center p-3 bg-secondary rounded-xl">
-                  <div className="text-xs text-gray-400 ">Share</div>
-                  <div className="text-sm font-bold" style={{ color: '#6FCCCA' }}>
-                    {test.share_code || 'N/A'}
-                  </div>
-                  <CopyButton text={test.share_code || ""} />
-                </div>
-              </div>
-
-              {/* Mode & Subjects */}
-              <div className="px-6 pb-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Mode</span>
-                  <span
-                    className="text-xs px-3 py-1 rounded-full font-medium"
-                    style={{
-                      backgroundColor: test.test_mode === 'regular' ? '#6FCCCA20' : '#f3f4f6',
-                      color: test.test_mode === 'regular' ? '#6FCCCA' : '#6b7280'
-                    }}
-                  >
-                    {test.test_mode === 'regular' ? 'Regular' : 'Exam'}
-                  </span>
-                </div>
-
-                {/* <div className="flex flex-wrap gap-1">
-                  {test.subjects.map((subject, index) => (
-                    <span
-                      key={subject}
-                      className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                    >
-                      {subject}
-                    </span>
-                  ))}
-                </div> */}
-              </div>
-              <p></p>
-              {/* Start Button */}
-              <div className="p-6 pt-0">
-                <button
-                  onClick={startTest}
-                  className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
-                >
-                  <Play className="w-5 h-5  transition-transform" />
-                  Start Test
-                </button>
-              </div>
-
-              {/* Bottom accent */}
-              <div className="h-1" style={{ backgroundColor: '#6' }}></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // Test taking interface
   const currentQuestion = questions[currentQuestionIndex]
@@ -434,9 +325,9 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
   const isAnswered = isCurrentQuestionAnswered()
   const results = calculateResults()
   return (
-    <div className="container mx-auto px-4 relative">
+    <div className="container mx-auto  relative">
       {testCompleted && !showReviewMode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40">
           <div className="w-full mx-auto px-6 max-w-2xl">
             <Card>
               <CardHeader className="text-center">
@@ -528,11 +419,12 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
           </div>
         )}
       </div>
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
-        <div className="container mx-auto py-4 px-2 flex items-center justify-between">
+      <header className="bg-background/80 backdrop-blur-sm border-border border-b sticky top-0 z-10">
+        <div className="container mx-auto py-4 px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <SidebarTrigger className="p-3 rounded-full w-10 h-10" />
+            <SidebarTrigger variant={"secondary"} className="p-3 rounded-full w-10 h-10" />
             <div className="hidden md:block">
+              {test.title}
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -568,7 +460,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                         } else if (isAnswered && !isCorrect && test.test_mode === 'regular') {
                           return 'bg-red-300 p-1  border-red-300'
                         } else {
-                          return 'bg-gray-300 p-1 border-gray-300'
+                          return 'bg-secondary p-1 border-border'
                         }
                       }
 
@@ -583,7 +475,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                       // Default answered/unanswered colors
                       return isAnswered
                         ? 'bg-[#6FCCCA] border-[#6FCCCA]'
-                        : 'bg-white border-gray-300 hover:border-gray-400'
+                        : 'bg-secondary border-border hover:border-gray-500'
                     }
 
                     return (
@@ -605,7 +497,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Question Panel */}
           <div className="lg:col-span-3">
-            <Card className='shadow-none border-none'>
+            <Card className='shadow-none border-none bg-transparent'>
               <CardHeader>
                 <CardTitle className="flex items-start gap-3 pt-0">
                   <p className="flex-1  text-xl font-semibold">{currentQuestionIndex + 1}. {currentQuestion.questions.question_text}</p>
@@ -636,13 +528,13 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                             htmlFor={option.value}
                             className={`flex justify-between items-center space-x-3 py-4 px- rounded-lg border transition-colors ${showResult
                               ? isCorrect
-                                ? 'bg-green-50 border-none'
+                                ? 'bg-green-100 dark:bg-green-700/30 border-none'
                                 : isSelected && !isCorrect
-                                  ? 'bg-red-50 border-none'
-                                  : 'border-none bg-white shadow'
+                                  ? 'bg-red-50 dark:bg-red-700/20  border-none'
+                                  : 'border-none bg-white dark:bg-secondary shadow'
                               : isSelected
                                 ? 'bg-[#6FCCCA]/30 border-none'
-                                : 'bg-white shadow  border-none hover:bg-gray-100'
+                                : 'bg-white dark:bg-secondary shadow border-none hover:bg-accent'
                               } ${isDisabled ? 'cursor-not-allowed opacity-75' : ''}`}
                           >
                             <div className='flex items-center space-x-3 py-1 px-3 rounded-lg w-full'>
@@ -708,9 +600,9 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                 </div>
                 {/* Explanation */}
                 {shouldShowExplanation && (
-                  <div className="mt-6 py-4 border-none rounded-lg w-full">
-                    <h4 className="font-medium text-sm text-gray-400 mb-2">Explanation</h4>
-                    <p className="text-gray-800 text-sm/7  whitespace-pre-wrap py-4 prose w-full">{renderBoldText(currentQuestion.questions.explanation)}</p>
+                  <div className="mt-6 bg-card px-6 py-4 border-none rounded-lg w-full">
+                    <h4 className="font-medium text-sm  mb-2">Explanation</h4>
+                    <p className="text-sm/7 text-foreground py-4 prose w-full">{renderBoldText(currentQuestion.questions.explanation)}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <p className='text-xs text-gray-600 font-bold'>
                         {currentQuestion.questions.subjects.name}

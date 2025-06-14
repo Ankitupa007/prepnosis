@@ -1,6 +1,7 @@
 // app/api/grand-tests/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@/supabase/server'
+
 export async function GET() {
   const supabase = await createClient()
   const { data, error } = await supabase

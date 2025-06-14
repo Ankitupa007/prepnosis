@@ -139,3 +139,106 @@ export interface TopicPerformance {
   accuracy_percentage: number;
   strength_level: 'weak' | 'beginner' | 'intermediate' | 'strong';
 }
+
+
+export interface SubjectPolygonData {
+  subject: {
+    id: string;
+    name: string;
+    weightage: number;
+    icon_name: string;
+  };
+  accuracyMetrics: {
+    overall: number;
+    topicBased: number;
+    testBased: number;
+    strength: number;
+    consistency: number;
+    activity: number;
+  };
+  stats: {
+    questionsAttempted: number;
+    topicsStudied: number;
+    testQuestions: number;
+    strengthDistribution: {
+      weak: number;
+      beginner: number;
+      intermediate: number;
+      strong: number;
+    };
+  };
+  polygon: Array<{
+    x: number;
+    y: number;
+    value: number;
+    label: string;
+  }>;
+}
+
+export interface TestCardProps {
+  test: CustomTest
+  onStart: () => void
+  onView: () => void
+  onDelete: () => void
+  bestScore: number | null
+  isDeleting: boolean
+}
+
+
+export interface TestAttempt {
+  id: string
+  score: number
+  total_questions: number
+  correct_answers: number
+  completed_at: string
+  time_taken: number
+}
+
+export interface CustomTest {
+  id: string
+  title: string
+  description: string
+  test_mode: 'regular' | 'exam'
+  total_questions: number
+  total_marks: number
+  created_at: string
+  share_code: string
+  attempts: TestAttempt[]
+  subjects: Array<{
+    id: string
+    name: string
+  }>
+  _count: {
+    attempts: number
+  }
+}
+export interface CustomTestsResponse {
+  tests: CustomTest[]
+}
+
+export interface UseCustomTestsReturn {
+  // Tests
+  customTests: CustomTest[];//User's custom tests
+  isLoadingCustomTests: boolean; // New: Loading state for user custom tests
+  customTestsError: Error | null; // New: Error state for user custom tests
+
+  // Test operations
+  createCustomTest: (testData: Partial<Test>) => Promise<Test>;
+  updateCustomTest: (id: string, testData: Partial<Test>) => Promise<Test>;
+  deleteCustomTest: (id: string) => Promise<void>; // New: Delete custom test
+
+  // Test attempts
+  startCustomTest: (testId: string) => Promise<{ attemptId: string }>;
+  submitCustomTest: (attemptId: string, answers: any[]) => Promise<UserTestAttempt>;
+  getUserAttempts: (testId?: string) => UserTestAttempt[];
+  getUserAttemptForTest: (testId: string) => UserTestAttempt | undefined;
+
+  // Rankings and stats
+
+  // Utility functions
+  getCustomTestById: (testId: string) => CustomTest | undefined; // New: Get custom test by ID
+  refetchCustomTests: () => void; // New: Refetch user custom tests
+  isCreatingCustomTest: boolean;
+  isUpdatingCustomTest: boolean;
+  isDeletingCustomTest: boolean; // New: Deleting custom test state
+}

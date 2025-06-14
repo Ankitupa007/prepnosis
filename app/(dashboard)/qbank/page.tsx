@@ -1,9 +1,7 @@
-import { BookOpenText, Github } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import UserAuthState from "@/components/user-auth-state";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import HomeCTABtn from "@/components/home-cta-btn";
+import { Badge } from "@/components/ui/badge";
+import UserAuthState from "@/components/user-auth-state";
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen mx-auto w-full">

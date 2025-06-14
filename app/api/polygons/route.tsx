@@ -1,7 +1,6 @@
-
-// ===== API ROUTE: app/api/analytics/subject-polygons/route.ts =====
-import { NextRequest, NextResponse } from 'next/server';
+// /api/analytics/subject-polygons/route.ts
 import { createClient } from '@/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {

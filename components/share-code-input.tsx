@@ -62,13 +62,14 @@ export default function ShareCodeInput() {
   return (
     <Card className="w-full max-w-md mx-auto bg-transparent border-none shadow-none">
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form autoFocus={false} onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="shareCode">Enter Share Code</Label>
             <Input
               id="shareCode"
               type="text"
               autoComplete='off'
+              autoFocus={false}
               value={shareCode}
               onChange={handleInputChange}
               placeholder="ABC12345"

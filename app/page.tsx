@@ -1,30 +1,13 @@
-import { BookOpenText, Github } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import UserAuthState from "@/components/user-auth-state";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import Logo from "@/components/common/logo";
 import HomeCTABtn from "@/components/home-cta-btn";
-import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import UserAuthState from "@/components/user-auth-state";
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen mx-auto w-full">
       <header className="container mx-auto py-4 px-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Image
-            src={"/logo.png"}
-            alt="Prepnosis Logo"
-            width={40}
-            height={40}
-            priority
-            draggable={false}
-            loading="eager"
-            unoptimized={true}
-            fetchPriority="high"
-            style={{ objectFit: "contain" }}
-            className="h-10 w-10 object-cover"
-          />
-          <h1 className="font-bold text-xl text-[#6FCCCA]">prepnosis</h1>
-        </div>
+        <Logo />
         <div className="flex items-center gap-4">
           <UserAuthState />
         </div>

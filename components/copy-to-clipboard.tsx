@@ -3,16 +3,14 @@
 
 import React, { useState } from 'react';
 import { Copy, Check, AlertCircle } from 'lucide-react';
+import { Button } from './ui/button';
 
 type Status = 'idle' | 'success' | 'error';
-type Size = 'sm' | 'md' | 'lg';
-type Variant = 'default' | 'primary' | 'secondary' | 'outline' | 'ghost';
 
 interface CopyButtonProps {
   text: string;
   className?: string;
-  size?: Size;
-  variant?: Variant;
+  size?: 'sm' | 'md' | 'lg';
   timeout?: number;
   disabled?: boolean;
   'aria-label'?: string;
@@ -22,7 +20,6 @@ const CopyButton: React.FC<CopyButtonProps> = ({
   text,
   className = '',
   size = 'md',
-  variant = 'default',
   timeout = 2000,
   disabled = false,
   'aria-label': ariaLabel = 'Copy to clipboard'
@@ -38,47 +35,19 @@ const CopyButton: React.FC<CopyButtonProps> = ({
       setTimeout(() => setStatus('idle'), timeout);
     } catch (err) {
       setStatus('error');
+      console.log(err);
       setTimeout(() => setStatus('idle'), timeout);
     }
   };
 
-  // Size variants
-  const sizeClasses: Record<Size, string> = {
-    sm: 'p-1.5',
-    md: 'p-2',
-    lg: 'p-3'
-  };
-
-  const iconSizes: Record<Size, string> = {
-    sm: 'w-3 h-3',
-    md: 'w-4 h-4',
-    lg: 'w-5 h-5'
-  };
-
-  // Color variants
-  const variantClasses: Record<Variant, string> = {
-    default: 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300',
-    primary: 'bg-blue-500 hover:bg-blue-600 text-white',
-    secondary: 'bg-gray-500 hover:bg-gray-600 text-white',
-    outline: 'border-2 border-gray-300 hover:border-gray-400 bg-transparent text-gray-700',
-    ghost: 'hover:bg-gray-100 text-gray-600'
-  };
-
-  // Status colors
-  const statusClasses: Record<Status, string> = {
-    idle: variantClasses[variant],
-    success: 'bg-green-500 text-white border-green-500',
-    error: 'bg-red-500 text-white border-red-500'
-  };
-
-  const getIcon = (): React.JSX.Element => {
-    const iconClass = iconSizes[size];
+  const getIcon = () => {
+    const iconClass = size === 'sm' ? 'w-3 h-3' : size === 'lg' ? 'w-5 h-5' : 'w-4 h-4';
 
     switch (status) {
       case 'success':
-        return <Check className={iconClass} />;
+        return <Check className={`${iconClass} text-primary`} />;
       case 'error':
-        return <AlertCircle className={iconClass} />;
+        return <AlertCircle className={`${iconClass} text-destructive`} />;
       default:
         return <Copy className={iconClass} />;
     }
@@ -95,24 +64,28 @@ const CopyButton: React.FC<CopyButtonProps> = ({
     }
   };
 
+  const buttonSize = size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'sm';
+
   return (
-    <button
+    <Button
+      variant="ghost"
+      size={buttonSize}
       onClick={copyToClipboard}
-      disabled={disabled || status === 'success' || status === 'error'}
+      disabled={disabled || status !== 'idle'}
       aria-label={getAriaLabel()}
       className={`
-        inline-flex items-center justify-center rounded-md
+        h-auto rounded-full p-2
+        hover:bg-accent hover:text-accent-foreground
+        focus:ring-2 focus:ring-ring focus:ring-offset-2
         transition-all duration-200 ease-in-out
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
         disabled:cursor-not-allowed disabled:opacity-50
-        ${sizeClasses[size]}
-        ${statusClasses[status]}
-        ${status !== 'idle' ? 'transform scale-95' : 'hover:scale-105'}
+        ${status === 'success' ? 'bg-primary/10 hover:bg-primary/20' : ''}
+        ${status === 'error' ? 'bg-destructive/10 hover:bg-destructive/20' : ''}
         ${className}
       `.trim()}
     >
       {getIcon()}
-    </button>
+    </Button>
   );
 };
 

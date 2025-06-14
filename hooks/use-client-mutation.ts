@@ -1,5 +1,5 @@
 //this hook nade to (insert, update, delete) in supabase -> used in client side components only.
-
+"use client"
 import { createClient } from "@/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         name,
         description,
         weightage_neet_pg,
-        weightage_inicet
+        weightage_inicet,
       })
       .select()
       .single()

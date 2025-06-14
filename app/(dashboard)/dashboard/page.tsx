@@ -1,55 +1,25 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import UserAuthState from "@/components/user-auth-state";
+import UserHeader from "@/components/user-header";
 import { createClient } from "@/supabase/server";
 import {
   BookCheck,
-  ClipboardCheck,
   ClipboardPlus,
   FileQuestion,
   FileText,
-  GraduationCap,
-  Home,
   ArrowRight,
   TrendingUp,
-  Target,
-  Award,
   Calendar,
-  Clock,
-  PlusCircle
 } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+    <div className="flex flex-col min-h-screen bg-background">
       {/* Enhanced Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
-        <div className="container mx-auto py-4 px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <SidebarTrigger className="p-3 rounded-full w-10 h-10 bg-gray-100 hover:bg-gray-50" />
-            <div className="hidden md:block">
-              <Suspense
-                fallback={
-                  <div className="animate-pulse">
-                    <div className="h-8 bg-gray-200 rounded-lg w-64 mx-auto mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-48 mx-auto"></div>
-                  </div>
-                }>
-                <UserData />
-              </Suspense>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <UserAuthState />
-          </div>
-        </div>
-      </header>
+      <UserHeader text="Dashboard" />
       <main className="flex-1 mx-auto w-full px-4">
         {/* Welcome Section */}
-        <section className="w-full py-6">
+        <section className="w-full">
           {/* <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center space-y-8 text-center">
               <div className="space-y-6 max-w-4xl">
@@ -100,7 +70,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Enhanced Action Cards */}
-        <section className="w-full py-8 md:py-0 lg:py-0">
+        <section className="w-full py-8 md:py-8 lg:py-8">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
 
@@ -173,7 +143,7 @@ export default function DashboardPage() {
               </Link>
 
               {/* Qbank Card */}
-              <Link href="/dashboard/analytics" className="group">
+              <Link href="/polygons" className="group">
                 <div className="relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-200/50 hover:border-[#6FCCCA]/30 transform hover:-translate-y-2 overflow-hidden">
                   {/* Background Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

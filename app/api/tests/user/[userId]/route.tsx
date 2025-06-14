@@ -1,6 +1,6 @@
 // app/api/tests/user/[userId]/route.ts
-import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
@@ -34,6 +34,7 @@ export async function GET(
         total_marks,
         duration_minutes,
         created_at,
+        share_code,
         test_questions!inner(
           questions(
             subjects(id, name),
@@ -94,6 +95,7 @@ export async function GET(
         created_at: test.created_at,
         subjects: subjects,
         attempts: attempts,
+        share_code: test.share_code,
         _count: {
           attempts: attempts.length
         }
