@@ -2,8 +2,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Copy, Check, AlertCircle } from 'lucide-react';
+import { Copy, Check, AlertCircle, Loader } from 'lucide-react';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 type Status = 'idle' | 'success' | 'error';
 
@@ -32,6 +33,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({
     try {
       await navigator.clipboard.writeText(text);
       setStatus('success');
+      toast.success(`copied!`)
       setTimeout(() => setStatus('idle'), timeout);
     } catch (err) {
       setStatus('error');
@@ -45,7 +47,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({
 
     switch (status) {
       case 'success':
-        return <Check className={`${iconClass} text-primary`} />;
+        return <Check className={`${iconClass} text-gray-100`} />;
       case 'error':
         return <AlertCircle className={`${iconClass} text-destructive`} />;
       default:
@@ -76,10 +78,9 @@ const CopyButton: React.FC<CopyButtonProps> = ({
       className={`
         h-auto rounded-full p-2
         hover:bg-accent hover:text-accent-foreground
-        focus:ring-2 focus:ring-ring focus:ring-offset-2
         transition-all duration-200 ease-in-out
-        disabled:cursor-not-allowed disabled:opacity-50
-        ${status === 'success' ? 'bg-primary/10 hover:bg-primary/20' : ''}
+        disabled:cursor-not-allowed disabled:opacity-70
+        ${status === 'success' ? 'bg-primary/50 hover:bg-primary/20' : ''}
         ${status === 'error' ? 'bg-destructive/10 hover:bg-destructive/20' : ''}
         ${className}
       `.trim()}

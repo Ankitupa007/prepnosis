@@ -132,7 +132,7 @@ export async function GET(
     // Check if user has already attempted this test
     const { data: attempt, error: attemptError } = await supabase
       .from('user_test_attempts')
-      .select('id, started_at, submitted_at, is_completed, score, total_marks')
+      .select('id, started_at, submitted_at, is_completed, total_score')
       .eq('test_id', id)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })

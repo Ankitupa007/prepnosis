@@ -1,7 +1,6 @@
 // app/api/tests/[id]/submit/route.ts
 import { createClient } from '@/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import React, { use } from 'react';
 
 export async function POST(
   request: NextRequest,
@@ -63,7 +62,7 @@ export async function POST(
     if (!attempt) {
       return NextResponse.json(
         { error: 'No active attempt found' },
-        { status: 404 }
+        { status: 406 }
       )
     }
 

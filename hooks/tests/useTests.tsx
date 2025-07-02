@@ -193,7 +193,7 @@ export function useCustomTests(): UseCustomTestsReturn {
     // Test operations
     createCustomTest: createCustomTestMutation.mutateAsync,
     updateCustomTest: (id: string, testData: Partial<Test>) =>
-      updateCustomTestMutation.mutateAsync({ id, testData }),
+    updateCustomTestMutation.mutateAsync({ id, testData }),
     deleteCustomTest: deleteCustomTestMutation.mutateAsync,
 
     // Test attempts

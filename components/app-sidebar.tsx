@@ -22,6 +22,7 @@ import {
   Settings,
   LogOut,
   Hexagon,
+  Bookmark,
 } from "lucide-react"
 import Logo from "./common/logo"
 import { ToggleTheme } from "./toggle-theme"
@@ -32,6 +33,7 @@ const navigationItems = [
   { title: "Grand Tests", url: "/grand-tests", icon: FileText },
   { title: "Question Bank", url: "/qbank", icon: FileQuestion },
   { title: "Subject Polygons", url: "/polygons", icon: Hexagon },
+  { title: "Bookmarks", url: "/bookmarks", icon: Bookmark },
 ]
 
 export function AppSidebar() {

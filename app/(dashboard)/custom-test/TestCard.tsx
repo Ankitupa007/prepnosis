@@ -146,7 +146,7 @@ function TestCard({ test, onStart, onView, onDelete, bestScore }: TestCardProps)
           <div className="flex items-center gap-1 text-xs sm:text-sm">
             <Share2 className="h-3 w-3 text-[#66c3c1]" />
             <span className='text-[#66c3c1]'>{test.share_code}</span>
-            <CopyButton size='sm' text='Share Code' />
+            <CopyButton size='sm' text={test.share_code} />
           </div>
         </div>
 

@@ -33,7 +33,7 @@ export const CircleProgress: React.FC<CircleProgressProps> = ({
 
   return (
     <div
-      className="relative flex items-center justify-center transition-transform duration-300 hover:scale-105"
+      className="relative flex items-center justify-center transition-transform duration-300"
       style={{ width: size, height: size }}
     >
       <svg
@@ -48,7 +48,7 @@ export const CircleProgress: React.FC<CircleProgressProps> = ({
           r={radius}
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-gray-200"
+          className="text-primary/40"
           fill="transparent"
         />
         {/* Foreground Progress Circle */}
@@ -65,7 +65,7 @@ export const CircleProgress: React.FC<CircleProgressProps> = ({
           strokeLinecap="round"
         />
       </svg>
-      <span className="absolute text-sm font-semibold text-gray-800">
+      <span className="absolute text-primary text-2xl font-bold ">
         {progress}%
       </span>
     </div>

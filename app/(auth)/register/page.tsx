@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import RegisterForm from "./register-form";
-import Logo from "@/components/common/logo";
 import WebsiteHeader from "@/components/common/website-header";
 
 export const metadata: Metadata = {
@@ -12,23 +11,34 @@ export default function SignupPage() {
   return (
     <main>
       <WebsiteHeader />
-      <div className="container py-4  px-6 flex mx-auto flex-col justify-center ">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-          <div className="space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Create an account
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Sign up for a new account to get started
-            </p>
+      <section>
+        <div className="grid min-h-svh lg:grid-cols-2 bg-primary/20">
+          <div className="flex flex-col gap-4 p-6 md:p-10">
+            <div className="flex flex-1 items-center justify-center">
+              <div className="w-full max-w-md pb-8 bg-background px-6 py-4 rounded-xl ">
+                <div className="py-6 text-center space-y-2">
+                  <h1 className="text-2xl font-bold">Create an account</h1>
+                  <p className="text-foreground/60">
+                    Sign up for a new account to get started
+                  </p>
+                </div>
+                <RegisterForm />
+                <p className="px-8 py-4 text-center text-sm text-muted-foreground">
+                  By clicking continue, you agree to our terms of service and
+                  privacy policy..
+                </p>
+              </div>
+            </div>
           </div>
-          <RegisterForm />
-          <p className="px-8 text-center text-sm text-muted-foreground">
-            By clicking continue, you agree to our terms of service and privacy
-            policy.
-          </p>
+          <div className="bg-[#FAFAEB] relative hidden lg:block">
+            {/* <img
+              src="/placeholder.svg"
+              alt="Image"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+            /> */}
+          </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

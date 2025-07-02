@@ -135,3 +135,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+.pushable {
+  /* background: hsl(179deg 56% 44%); */
+  border-radius: 12px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline-offset: 4px;
+}
+.front {
+  display: block;
+  /* padding: 12px 12px; */
+  border-radius: 12px;
+  /* background: hsl(179deg 56% 58%); */
+  transform: translateY(-6px);
+}
+.pushable:active .front {
+  transform: translateY(-2px);
+}

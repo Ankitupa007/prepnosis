@@ -3,28 +3,33 @@ import { useAuth } from "@/lib/auth-context";
 import React, { useTransition } from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
-import { Icons } from "@/components/ui/icons"; // Import spinner icon
 
 export default function HomeCTABtn() {
   const { user } = useAuth();
   const [isPending, startTransision] = useTransition();
 
   return (
-    <div className=" gap-4">
+    <div className="py-8">
       {user ? (
         <div>
-          <Button className="w-full py-8 px-24 bg-[#6FCCCA] hover:bg-[#6FCCCA]/80" asChild>
-            <Link href={"/dashboard"} className="font-bold text-xl">
-              Go to dashboard
+          <button className="w-full py-8 pushable bg-[#31AFAD]">
+            <Link
+              href={"/dashboard"}
+              className="text-xl font-bold front text-background text-background w-full px-8 py-4 bg-[#6FCCCA]"
+            >
+              Dashboard
             </Link>
-          </Button>
+          </button>
         </div>
       ) : (
-        <Button className="w-full py-8 px-24 bg-[#6FCCCA] hover:bg-[#6FCCCA]/80" asChild>
-          <Link href={"/login"} className="text-xl font-bold">
+        <button className="w-full py-8 px-24  pushable bg-[#31AFAD]">
+          <Link
+            href={"/login"}
+            className="text-xl font-bold front text-background px-8 py-4 bg-[#6FCCCA]"
+          >
             Get Started
           </Link>
-        </Button>
+        </button>
       )}
     </div>
   );

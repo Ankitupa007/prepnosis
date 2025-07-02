@@ -70,11 +70,11 @@ export async function POST(
     // Check if test is scheduled and available
     const now = new Date();
     if (test.scheduled_at && new Date(test.scheduled_at) > now) {
-      return NextResponse.json({ error: 'Test has not started yet' }, { status: 400 });
+      return NextResponse.json({ error: 'Test has not started yet' }, { status: 412 });
     }
 
     if (test.expires_at && new Date(test.expires_at) < now) {
-      return NextResponse.json({ error: 'Test has expired' }, { status: 400 });
+      return NextResponse.json({ error: 'Test has expired' }, { status: 413 });
     }
 
     // Check if user has already completed this test

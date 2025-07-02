@@ -5,7 +5,7 @@ const Logo = ({ }) => {
   return <div className="flex items-center gap-2">
     <Link href={"/"}>
       <Image
-        src={"/logo.png"}
+        src={"/logo.svg"}
         alt="Prepnosis Logo"
         width={40}
         height={40}

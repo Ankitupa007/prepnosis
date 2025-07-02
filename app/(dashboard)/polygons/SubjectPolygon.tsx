@@ -32,6 +32,7 @@ import {
   Smile,       // Dermatology
 } from "lucide-react";
 
+
 const SubjectAccuracyPolygons = () => {
   const [polygonData, setPolygonData] = useState<SubjectPolygonData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +58,7 @@ const SubjectAccuracyPolygons = () => {
       setLoading(false);
     }
   };
+
   const subjectIconMap: Record<string, React.FC<any>> = {
     Anatomy: Hand,
     Physiology: Activity,
@@ -80,43 +82,44 @@ const SubjectAccuracyPolygons = () => {
     Unknown: FileQuestion,
     Dermatology: Sparkles, // or Sparkles for cosmetic derm
   };
-  const SubjectPolygon = ({ data, isSelected, onClick }: {
+
+  const getColorByAccuracy = (accuracy: any) => {
+    if (accuracy >= 80) return { fill: '#10b981', stroke: '#059669' }; // Green
+    if (accuracy >= 60) return { fill: '#f59e0b', stroke: '#d97706' }; // Yellow/Orange
+    if (accuracy < 60) return { fill: '#ef4444', stroke: '#dc2626' }; // Red
+    return { fill: '#6b7280', stroke: '#4b5563' }; // Gray
+  };
+
+  interface SubjectPolygonProps {
     data: SubjectPolygonData;
     isSelected: boolean;
     onClick: () => void;
-  }) => {
+  }
+
+  const SubjectPolygon = ({ data, isSelected, onClick }: SubjectPolygonProps) => {
     const svgSize = 200;
     const center = svgSize / 2;
     const maxRadius = 80;
-    const Icon = subjectIconMap[data.subject.name] || (() => <div>❓</div>);
+    const Icon = subjectIconMap[data.subject.name] || FileQuestion;
+
     // Create hexagon grid lines
     const gridLevels = [20, 40, 60, 80];
     const angles = [0, 60, 120, 180, 240, 300];
 
-    const createPolygonPath = (points: any[]) => {
-      return points.map((point, index) =>
-        `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
-      ).join(' ') + ' Z';
-    };
-
-    const getColorByAccuracy = (accuracy: number) => {
-      if (accuracy >= 80) return '#10B981'; // Green
-      if (accuracy >= 60) return '#F59E0B'; // Yellow
-      if (accuracy >= 40) return '#EF4444'; // Red
-      return '#6B7280'; // Gray
-    };
+    const colors = getColorByAccuracy(data.accuracyMetrics.overall);
 
     return (
       <div
-        className={`bg-background rounded-xl p-4 shadow-sm border transition-all cursor-pointer ${isSelected ? 'border-[#66c3c1] shadow-lg scale-105' : 'border-border hover:shadow-md'
+        className={`bg-background rounded-xl p-4 shadow-sm border-2 border-dashed transition-all cursor-pointer ${isSelected ? 'border-primary shadow-lg scale-105' : 'border-border hover:shadow-md'
           }`}
         onClick={onClick}
       >
         <div className="text-center mb-3">
-          <h3 className="font-semibold text-foreground text-sm flex items-center justify-center gap-2"><Icon className="w-4 h-4 text-primary" />
-
-          {data.subject.name}</h3>
-          <p className="text-xs text-gray-500">Weightage: {data.subject.weightage}%</p>
+          <h3 className="font-semibold text-foreground text-sm flex items-center justify-center gap-2">
+            <Icon className="w-4 h-4" />
+            {data.subject.name}
+          </h3>
+          <p className="text-xs my-2 text-foreground/50">Weightage: {data.subject.weightage}%</p>
         </div>
 
         <div className="flex justify-center mb-3">
@@ -134,7 +137,8 @@ const SubjectAccuracyPolygons = () => {
                   key={level}
                   points={gridPoints.map(p => `${p.x},${p.y}`).join(' ')}
                   fill="none"
-                  stroke="#bbbbbb"
+                  strokeDasharray="2,6"
+                  stroke="#666666"
                   strokeWidth="1"
                 />
               );
@@ -148,7 +152,7 @@ const SubjectAccuracyPolygons = () => {
                 y1={center}
                 x2={center + maxRadius * Math.cos((angle * Math.PI) / 180)}
                 y2={center + maxRadius * Math.sin((angle * Math.PI) / 180)}
-                stroke="#E5E7EB"
+                stroke="#666666"
                 strokeWidth="1"
               />
             ))}
@@ -156,9 +160,9 @@ const SubjectAccuracyPolygons = () => {
             {/* Performance polygon */}
             <polygon
               points={data.polygon.map(p => `${p.x},${p.y}`).join(' ')}
-              fill={getColorByAccuracy(data.accuracyMetrics.overall)}
-              fillOpacity="0.3"
-              stroke={getColorByAccuracy(data.accuracyMetrics.overall)}
+              fill={colors.fill}
+              fillOpacity="0.4"
+              stroke={colors.stroke}
               strokeWidth="2"
             />
 
@@ -168,8 +172,10 @@ const SubjectAccuracyPolygons = () => {
                 key={index}
                 cx={point.x}
                 cy={point.y}
-                r="3"
-                fill={getColorByAccuracy(data.accuracyMetrics.overall)}
+                r="4"
+                fill={colors.stroke}
+                stroke={colors.stroke}
+                strokeWidth="1"
               />
             ))}
 
@@ -188,7 +194,7 @@ const SubjectAccuracyPolygons = () => {
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize="10"
-                  fill="#6B7280"
+                  fill="#374151"
                   className="font-medium"
                 >
                   {point.label.split('-')[0]}
@@ -201,19 +207,18 @@ const SubjectAccuracyPolygons = () => {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="text-center">
             <p className="font-semibold text-foreground">{data.accuracyMetrics.overall}%</p>
-            <p className="text-gray-600">Overall</p>
+            <p className="text-foreground/50">Overall</p>
           </div>
           <div className="text-center">
             <p className="font-semibold text-foreground">{data.stats.questionsAttempted}</p>
-            <p className="text-gray-600">Questions</p>
+            <p className="text-foreground/50">Questions</p>
           </div>
         </div>
       </div>
     );
   };
-
   const DetailedView = ({ data }: { data: SubjectPolygonData }) => (
-    <div className="bg-background rounded-xl p-6 shadow-sm border border-border">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
       <h3 className="text-xl font-semibold text-foreground mb-4">{data.subject.name} - Detailed Analysis</h3>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
@@ -240,7 +245,7 @@ const SubjectAccuracyPolygons = () => {
           <div className="space-y-2">
             {Object.entries(data.accuracyMetrics).map(([key, value]) => (
               <div key={key} className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                <span className="text-sm text-foreground/50 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
                 <span className="font-medium text-foreground">{value}%</span>
               </div>
             ))}
@@ -251,15 +256,15 @@ const SubjectAccuracyPolygons = () => {
           <h4 className="font-medium text-foreground mb-3">Study Statistics</h4>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Questions Attempted</span>
+              <span className="text-sm text-foreground/50">Questions Attempted</span>
               <span className="font-medium text-foreground">{data.stats.questionsAttempted}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Topics Studied</span>
+              <span className="text-sm text-foreground/50">Topics Studied</span>
               <span className="font-medium text-foreground">{data.stats.topicsStudied}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Test Questions</span>
+              <span className="text-sm text-foreground/50">Test Questions</span>
               <span className="font-medium text-foreground">{data.stats.testQuestions}</span>
             </div>
           </div>
@@ -271,25 +276,26 @@ const SubjectAccuracyPolygons = () => {
   const selectedData = polygonData.find(d => d.subject.id === selectedSubject);
 
   return (
-    <div className="space-y-6">
+    <div className=" bg-background min-h-screen">
       <UserHeader text='Subject Polygons' />
       {loading ? (
         <div className="flex items-center justify-center h-[80vh]">
-          <LoadingSpinner text='Loading Polygons' />
+          <div className="text-center">
+            <LoadingSpinner text='Loading Subject Polygons' />
+          </div>
         </div>
       ) : (
-
-        <section className='space-y-8 py-4 px-6'>
+        <section className='space-y-8 px-6 py-8'>
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-foreground">Subject Performance Polygons</h2>
-              <p className="text-gray-600">Visual analysis of your accuracy across all MBBS subjects</p>
+              <h2 className="text-2xl font-bold ">Subject Performance Polygons</h2>
+              <p className="text-foreground/50">Visual analysis of your accuracy across all MBBS subjects</p>
             </div>
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-border"
             >
               <option value="30">Last 30 days</option>
               <option value="90">Last 3 months</option>
@@ -321,32 +327,32 @@ const SubjectAccuracyPolygons = () => {
               <div className="flex items-center space-x-3">
                 <div className="w-4 h-4 bg-green-500 rounded"></div>
                 <div>
-                  <p className="font-medium text-foreground">Excellent (80%+)</p>
-                  <p className="text-sm text-gray-600">Strong performance</p>
+                  <p className="font-medium ">Excellent (80%+)</p>
+                  <p className="text-sm text-foreground/50">Strong performance</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-4 h-4 bg-yellow-500 rounded"></div>
                 <div>
-                  <p className="font-medium text-foreground">Good (60-79%)</p>
-                  <p className="text-sm text-gray-600">Above average</p>
+                  <p className="font-medium ">Good (60-79%)</p>
+                  <p className="text-sm text-foreground/50">Above average</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-4 h-4 bg-red-500 rounded"></div>
                 <div>
-                  <p className="font-medium text-foreground">Needs Work below (60%)</p>
-                  <p className="text-sm text-gray-600">Focus area</p>
+                  <p className="font-medium text-foreground">Needs Work (below 60%)</p>
+                  <p className="text-sm text-foreground/50">Focus area</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
       )}
-
     </div>
   );
 };
+
 
 export default SubjectAccuracyPolygons
 

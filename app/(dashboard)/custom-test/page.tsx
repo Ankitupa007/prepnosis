@@ -5,7 +5,7 @@ export default function CustomTestPage() {
   return (
     <div className="mx-auto relative">
       <UserHeader text='Custom Tests' />
-      <AllTests />
+        <AllTests />
     </div>
   )
 }

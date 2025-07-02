@@ -59,12 +59,14 @@ export default function LoginForm() {
 
       queryClient.invalidateQueries({ queryKey: ["user"] }); //invalidate the user
       router.push(redirectTo);
-      toast.success("Welcome Back!");
+      toast.success(
+        `Welcome Back, Dr.  ${response.user?.user_metadata.full_name}! 🩺`
+      );
     });
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 ">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4">
@@ -103,16 +105,24 @@ export default function LoginForm() {
               )}
             />
           </div>
-          <Button variant={"default"} type="submit" className="w-full mt-8" disabled={isPending}>
+          <button
+            type="submit"
+            className="w-full mt-8 pushable bg-[#31AFAD]"
+            disabled={isPending}
+          >
             {isPending ? (
-              <div className="flex items-center justify-center gap-1">
-                <Icons.spinner className="mr-2 h-4 w-4  animate-spin" />
-                <span>logging in...</span>
+              <div className="flex items-center justify-center px4 py-2 front text-background bg-[#6FCCCA]">
+                <span className="flex items-center gap-2 justify-center font-medium text-lg">
+                  <Icons.spinner className="h-4 w-4  animate-spin" />
+                  logging in...
+                </span>
               </div>
             ) : (
-              "Login"
+              <span className="front text-background py-2 px-4 font-medium text-lg bg-[#6FCCCA]">
+                Login
+              </span>
             )}
-          </Button>
+          </button>
         </form>
       </Form>
       <div className="relative">
@@ -145,7 +155,6 @@ export default function LoginForm() {
           )}{" "}
           Google
         </Button>
-
       </div>
     </div>
   );

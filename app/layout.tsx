@@ -42,7 +42,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            {children}
+              {children}
             <Toaster position="top-center" duration={3000} />
           </QueryProvider>
         </ThemeProvider>

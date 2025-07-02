@@ -28,6 +28,25 @@ export interface Test {
   shared_at?: string
   share_expires_at?: string
 }
+
+interface GrandTest {
+  id: string;
+  title: string;
+  description: string;
+  test_mode: "regular" | "exam";
+  total_questions: number;
+  total_marks: number;
+  subjects: string[] | "all";
+  share_code?: string;
+  user_attempt?: {
+    id: string;
+    started_at: string;
+    submitted_at: string | null;
+    is_completed: boolean;
+    total_score: number | null;
+  };
+}
+
 export interface TestSection {
   id: string;
   name: string;

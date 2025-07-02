@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import LoginForm from "./login-form";
-import { Suspense } from "react";
-import UserHeader from "@/components/user-header";
-import Image from "next/image";
-import Link from "next/link";
-import Logo from "@/components/common/logo";
 import WebsiteHeader from "@/components/common/website-header";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -16,21 +12,26 @@ export default function LoginPage() {
   return (
     <main>
       <WebsiteHeader />
-      <div className="container py-4  px-6 flex mx-auto flex-col justify-center ">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Welcome back
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Enter your email to sign in to your account
-            </p>
+      <section className="">
+        <div className="grid min-h-svh lg:grid-cols-2 bg-primary/20">
+          <div className="flex flex-col gap-4 p-6 md:p-10">
+            <div className="flex flex-1 items-start py-4 justify-center">
+              <div className="w-full max-w-md pb-8 bg-background px-6 py-4 rounded-xl ">
+                <div className="py-6 text-center space-y-2">
+                  <h1 className="text-2xl font-bold">Login to your account</h1>
+                  <p className="text-foreground/60">
+                    Enter your email below to login to your account
+                  </p>
+                </div>
+                <Suspense>
+                  <LoginForm />
+                </Suspense>
+              </div>
+            </div>
           </div>
-          <Suspense>
-            <LoginForm />
-          </Suspense>
+          <div className="bg-[#FAFAEB] relative hidden lg:block"></div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
