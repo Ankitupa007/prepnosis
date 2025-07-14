@@ -1,4 +1,7 @@
+// api/grand-tests/[id]/results
+
 import { createClient } from "@/supabase/server";
+
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(

@@ -67,9 +67,9 @@ export default function LeaderboardPage({
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto">
       <UserHeader text="Leaderboard" />
-      <Card className="max-w-4xl mx-auto">
+      <Card className="max-w-4xl mx-auto my-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-6 w-6 text-yellow-500" />

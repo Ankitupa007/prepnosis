@@ -285,10 +285,6 @@ export default function SectionPage({
       console.error("Error saving answer:", error);
       toast.error("Failed to save answer");
     }
-
-    if (test?.test_mode === "regular") {
-      setShowExplanation(true);
-    }
   };
 
   // Navigate to next question
@@ -566,8 +562,6 @@ export default function SectionPage({
     );
   }
 
-  // Ensure questions are loaded before rendering the test interface
-
   // Test taking interface
   const currentQuestion = questions[currentQuestionIndex];
   const currentAnswer = userAnswers.find(
@@ -579,7 +573,7 @@ export default function SectionPage({
   const results = calculateResults();
 
   return (
-    <div className="container mx-auto px-4 relative">
+    <div className="container mx-auto relative">
       {testCompleted && !showReviewMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full mx-auto px-6 fluency-2xl max-w-2xl">
@@ -634,7 +628,7 @@ export default function SectionPage({
                     </div>
                   </button>
                   <button
-                    onClick={() => router.push("/grand-tests")}
+                    onClick={() => router.push(`/grand-tests/${id}/results`)}
                     className="flex-1 pushable bg-[#c9c99c]"
                   >
                     <div className="front bg-[#ecec7c] py-2 text-foreground">
@@ -686,14 +680,18 @@ export default function SectionPage({
         </div>
       )}
 
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
-        <div className="container mx-auto py-4 px-2 flex items-center justify-between">
+      <header className="bg-white/80 backdrop-blur-2xl border-b border-gray-200/50 sticky top-0 z-10">
+        <div className="container mx-auto py-4 flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
-            <SidebarTrigger className="p-3 rounded-full w-10 h-10" />
-            <div className="text-lg font-semibold">
-              Section {section} - Time Remaining: {formatTime(remainingSeconds)}
+            <SidebarTrigger
+              variant={"secondary"}
+              className="p-3 rounded-full w-10 h-10"
+            />
+            <div className="font-semibold">
+              Section {section} : {formatTime(remainingSeconds)}
             </div>
           </div>
+         
           <div className="flex items-center gap-4">
             {!showReviewMode ? (
               <button

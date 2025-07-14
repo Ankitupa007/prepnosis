@@ -33,6 +33,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^12.23.5",
     "lucide-react": "^0.474.0",
     "marked": "^15.0.12",
     "next": "15.1.6",

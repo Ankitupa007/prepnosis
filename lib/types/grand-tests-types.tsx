@@ -27,7 +27,38 @@ export interface Test {
     current_section: number;
   };
 }
-
+export interface GrandTest {
+  id: string;
+  title: string;
+  description: string | null;
+  test_type: "grand_test";
+  test_mode: "regular" | "exam";
+  exam_pattern: "NEET_PG" | "INICET";
+  total_questions: number;
+  total_marks: number;
+  duration_minutes: number;
+  negative_marking: number;
+  sections: any;
+  is_active: boolean;
+  created_by: string;
+  created_at: string;
+  total_participants?: number;
+  user_attempt?: {
+    id: string;
+    total_score: number;
+    correct_answers: number;
+    incorrect_answers: number;
+    unanswered: number;
+    is_completed: boolean;
+    submitted_at: string | null;
+    time_taken_minutes: number;
+  } | null;
+  user_ranking?: {
+    rank: number;
+    percentile: number;
+    score: number;
+  } | null;
+}
 export interface TestQuestion {
   id: string;
   question_id: string;
