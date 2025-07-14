@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
-import { Manrope, Geist_Mono } from "next/font/google";
+import { Source_Sans_3, Ubuntu_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/query-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider"
-const manrope = Manrope({
+import { ThemeProvider } from "@/components/theme-provider";
+
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  preload: true,
 });
 
-const geistMono = Geist_Mono({
+const ubuntuMono = Ubuntu_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
+  weight: ["400", "700"],
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -30,11 +34,27 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
       </head>
-      <body className={`${manrope.variable} ${geistMono.variable} font-sans antialiased`} >
+      <body
+        className={`${sourceSans.variable} ${ubuntuMono.variable} font-sans antialiased`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -42,11 +62,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-              {children}
+            {children}
             <Toaster position="top-center" duration={3000} />
           </QueryProvider>
         </ThemeProvider>
       </body>
-    </html >
+    </html>
   );
 }

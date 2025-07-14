@@ -254,7 +254,7 @@ export function useTestRankings(testId: string) {
   return useQuery({
     queryKey: ['test-rankings', testId],
     queryFn: async () => {
-      const response = await fetch(`/api/tests/grand-tests/rankings?testId=${testId}`);
+      const response = await fetch(`/api/grand-tests/rankings?testId=${testId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch test rankings');
       }
@@ -272,7 +272,7 @@ export function useUserTestRanking(testId: string, userId?: string) {
   return useQuery({
     queryKey: ['user-test-ranking', testId, actualUserId],
     queryFn: async () => {
-      const response = await fetch(`/api/tests/grand-tests/rankings?testId=${testId}&userId=${actualUserId}`);
+      const response = await fetch(`/api/grand-tests/rankings?testId=${testId}&userId=${actualUserId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch user ranking');
       }

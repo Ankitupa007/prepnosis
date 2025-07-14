@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardPlus,
+  FileText,
   Play,
   RotateCcw,
 } from "lucide-react";
@@ -225,10 +226,11 @@ export default function CustomTestPage({
   const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       navigateToQuestion(currentQuestionIndex + 1);
-    } else if (test?.test_mode === "exam" && !testCompleted) {
-      // In exam mode, submit test when reaching the end
-      submitTest();
     }
+    //  else if (test?.test_mode === "exam" && !testCompleted) {
+    //   // In exam mode, submit test when reaching the end
+    //   // submitTest();
+    // }
   };
 
   // Navigate to previous question
@@ -237,6 +239,39 @@ export default function CustomTestPage({
       navigateToQuestion(currentQuestionIndex - 1);
     }
   };
+
+  // Add keyboard event listener
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if user is not typing in an input field
+      const target = event.target as HTMLElement;
+      const isInputField =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.contentEditable === "true";
+
+      if (isInputField) return;
+
+      switch (event.key) {
+        case "ArrowLeft":
+          event.preventDefault();
+          previousQuestion();
+          break;
+        case "ArrowRight":
+          event.preventDefault();
+          nextQuestion();
+          break;
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentQuestionIndex, questions.length, test?.test_mode, testCompleted]);
 
   // Submit test
   const submitTest = async () => {
@@ -471,8 +506,6 @@ export default function CustomTestPage({
     );
   }
 
-  // Trigger confetti immediately based on the condition
-
   // Test taking interface
   const currentQuestion = questions[currentQuestionIndex];
   const currentAnswer = userAnswers.find(
@@ -490,7 +523,7 @@ export default function CustomTestPage({
     <div className="container w-full mx-auto relative">
       {testCompleted && !showReviewMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full mx-auto px-4 max-w-2xl">
+          <div className="w-full mx-auto px-6 fluency-2xl max-w-2xl">
             <Card>
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2 text-2xl">
@@ -500,16 +533,13 @@ export default function CustomTestPage({
                 <CardDescription>{test.title}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6 mx-auto w-full">
-                {/* Score Display */}
-                <div className="text-center w-full mx-auto flex justify-center items-center ">
+                <div className="text-center w-full mx-auto flex justify-center items-center">
                   <CircleProgress
                     percentage={results.percentage}
                     size={120}
                     strokeWidth={10}
                   />
                 </div>
-
-                {/* Detailed Results */}
                 <div className="flex justify-center gap-4">
                   <div className="flex items-center space-x-2">
                     <div className="text-sm text-green-600">
@@ -532,32 +562,40 @@ export default function CustomTestPage({
                     </div>
                   )}
                 </div>
-                {/* Action Buttons */}
-                <div className="grid md:grid-cols-3 gap-4">
-                  {/* Show Review Answers button for exam mode */}
-                  <Button
+                <div className="grid md:grid-cols-1 gap-4">
+                  <button
                     onClick={toggleReviewMode}
-                    variant="outline"
-                    className="flex-1"
+                    className="flex-1 pushable bg-[#31afad]"
                   >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Review Answers
-                  </Button>
-                  <Button
-                    onClick={retakeTest}
-                    variant="outline"
-                    className="flex-1"
+                    <div className="front bg-[#6FCCCA] py-2">
+                      <p className="flex justify-center items-center text-background text-base font-semibold">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Review Answers
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => router.push("/custom-test")}
+                    className="flex-1 pushable bg-[#c9c99c]"
                   >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Retake Test
-                  </Button>
-                  <Button
-                    onClick={() => router.push("/custom-test/create")}
-                    className="flex-1"
+                    <div className="front bg-[#ecec7c] py-2 text-foreground">
+                      <p className="flex justify-center items-center text-black text-base font-semibold">
+                        <ClipboardPlus className="h-4 w-4 mr-2" />
+                        More Custom Tests
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => router.push(`/custom-test/${test.id}`)}
+                    className="flex-1 pushable bg-[#31afad]"
                   >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Create New Test
-                  </Button>
+                    <div className="front bg-[#6FCCCA] py-2 text-foreground">
+                      <p className="flex justify-center items-center text-background text-base font-semibold">
+                        <ClipboardPlus className="h-4 w-4 mr-2" />
+                        Re-attempt test
+                      </p>
+                    </div>
+                  </button>
                 </div>
               </CardContent>
             </Card>
@@ -577,25 +615,34 @@ export default function CustomTestPage({
                 What would you like to do next?
               </p>
               <div className="flex flex-col gap-3">
-                <Button
-                  className="w-full"
+                <button
                   onClick={() => {
                     setShowReviewMode(false);
                     setSubmitted(false);
                   }}
+                  className="flex-1 pushable bg-[#31afad]"
                 >
-                  See Results
-                </Button>
-                <Button
-                  className="w-full"
-                  variant="outline"
+                  <div className="front bg-[#6FCCCA] py-2">
+                    <p className="flex justify-center text-background items-center text-base font-semibold">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Check Result
+                    </p>
+                  </div>
+                </button>
+                <button
                   onClick={() => {
                     setShowReviewMode(true);
                     setSubmitted(false);
                   }}
+                  className="flex-1 pushable bg-[#c9c99c]"
                 >
-                  Review Explanations
-                </Button>
+                  <div className="front bg-[#ecec7c] py-2 text-foreground">
+                    <p className="flex justify-center items-center text-black text-base font-semibold">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Review Explanations
+                    </p>
+                  </div>
+                </button>
               </div>
             </div>
           </div>

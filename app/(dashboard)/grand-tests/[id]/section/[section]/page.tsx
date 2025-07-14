@@ -35,8 +35,8 @@ import { toast } from "sonner";
 
 interface Question {
   id: string;
-  question_order: number;
   question_text: string;
+  question_order: number;
   explanation: string;
   option_a: string;
   option_b: string;
@@ -100,10 +100,10 @@ interface UserAnswer {
   isCorrect?: boolean;
 }
 
-export default function GrandTestPage({
+export default function SectionPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; section: 1 | 2 | 3 | 4 | 5 }>;
 }) {
   const router = useRouter();
   const { user } = useAuth();
@@ -115,13 +115,14 @@ export default function GrandTestPage({
   const [testStarted, setTestStarted] = useState(false);
   const [testCompleted, setTestCompleted] = useState(false);
   const [isSubmitted, setSubmitted] = useState(false);
+  const [showSubmitTestButton, setShowSubmitTestButton] = useState(false);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [showReviewMode, setShowReviewMode] = useState(false);
   const [currentSection, setCurrentSection] = useState(1);
   const [remainingSeconds, setRemainingSeconds] = useState(2520); // 42 minutes
   const [isStarting, setIsStarting] = useState(false); // New state for startTest loading
-  const { id } = use(params);
+  const { id, section } = use(params);
 
   // Timer logic
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function GrandTestPage({
     return () => clearInterval(timer);
   }, [testStarted, testCompleted, currentSection]);
 
-  function splitIntoSections(array: Question[], numSections: number) {
+  function splitIntoSections(array: TestQuestion[], numSections: number) {
     const result = [];
     const sectionSize = Math.ceil(array.length / numSections);
     for (let i = 0; i < array.length; i += sectionSize) {
@@ -161,15 +162,14 @@ export default function GrandTestPage({
         const data = await response.json();
         setTest(data.test);
         if (data.current_section) {
-          // router.push(
-          //   `/grand-tests/${data.test.id}/section/${data.current_section}`
-          // );
           const sections = splitIntoSections(data.questions, 5);
-          console.log(sections);
+          console.log(sections[section - 1]);
           // setQuestions(data.questions);
+          setQuestions(sections[section - 1]);
+          setCurrentSection(data.current_section || section);
+          //   setCurrentQuestionIndex(sections[section - 1][0].question_order);
+          console.log(sections[section - 1][0].question_order);
         }
-        setQuestions(data.questions);
-        setCurrentSection(data.current_section || 1);
         setRemainingSeconds(data.remaining_seconds || 2520);
 
         console.log("Fetched test data:", data);
@@ -217,7 +217,7 @@ export default function GrandTestPage({
     if (id) {
       fetchTest();
     }
-  }, [id, router]);
+  }, [id, router, section]);
 
   // Navigation handler
   const navigateToQuestion = (index: number) => {
@@ -242,7 +242,6 @@ export default function GrandTestPage({
         setIsLoading(false);
         setAttemptId(data.attempt.id);
         setTestStarted(true);
-        router.push(`/grand-tests/${id}/section/1`);
       } else {
         throw new Error("Failed to start test");
       }
@@ -267,11 +266,12 @@ export default function GrandTestPage({
     setUserAnswers(updatedAnswers);
 
     try {
-      await fetch(`/api/grand-tests/${test?.id}/submit`, {
+      await fetch(`/api/grand-tests/${id}/answer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           attemptId,
+          currentSection,
           answers: [
             {
               questionId: currentQuestion.question_id,
@@ -279,7 +279,6 @@ export default function GrandTestPage({
               isCorrect,
             },
           ],
-          currentSection,
         }),
       });
     } catch (error) {
@@ -296,9 +295,7 @@ export default function GrandTestPage({
   const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setShowExplanation(showReviewMode || test?.test_mode === "regular");
-    } else if (!testCompleted) {
-      submitSection();
+      setShowExplanation(showReviewMode);
     }
   };
 
@@ -306,12 +303,11 @@ export default function GrandTestPage({
   const previousQuestion = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
-      setShowExplanation(showReviewMode || test?.test_mode === "regular");
+      setShowExplanation(showReviewMode);
     }
   };
 
-  // Submit current section
-  const submitSection = async () => {
+  const submitTest = async () => {
     if (!attemptId || !test || testCompleted) return;
     try {
       const response = await fetch(`/api/grand-tests/${test.id}/submit`, {
@@ -320,46 +316,59 @@ export default function GrandTestPage({
         body: JSON.stringify({
           attemptId,
           answers: userAnswers,
-          currentSection,
+          sectionNumber: section,
         }),
       });
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        if (data.results.next_section) {
-          setCurrentSection(data.results.next_section);
-          setCurrentQuestionIndex(0);
-          setRemainingSeconds(2520);
-          const fetchResponse = await fetch(`/api/grand-tests/${test.id}`);
-          const fetchData = await fetchResponse.json();
-          console.log(fetchData);
-          setQuestions(fetchData.questions);
-          setUserAnswers(
-            fetchData.questions.map((q: TestQuestion) => ({
-              questionId: q.question_id,
-              selectedOption: q.user_answer?.selected_option ?? null,
-              isCorrect:
-                q.user_answer?.selected_option !== null
-                  ? q.user_answer?.selected_option === q.question.correct_option
-                  : false,
-            }))
-          );
-          toast.success(
-            `Section ${currentSection} submitted! Moving to Section ${data.results.next_section}`
-          );
-        } else {
-          setTestCompleted(true);
-          setSubmitted(true);
-          setShowReviewMode(true);
-          setShowExplanation(true);
-          toast.success("Test submitted successfully!");
-        }
+        setTestCompleted(true);
+        setSubmitted(true);
+        setShowReviewMode(true);
+        setShowExplanation(true);
+        toast.success("Test submitted successfully!");
       } else {
         throw new Error("Failed to submit section");
       }
     } catch (error) {
       console.error("Error submitting section:", error);
       toast.error("Failed to submit section");
+    }
+  };
+
+  // Submit current section
+  const submitSection = async () => {
+    if (!attemptId || !test || testCompleted) return;
+    if (section < 6) {
+      try {
+        const response = await fetch(
+          `/api/grand-tests/${test.id}/section-submit`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              attemptId,
+              answers: userAnswers,
+              sectionNumber: section,
+            }),
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setRemainingSeconds(2520);
+          if (section < 5) {
+            router.push(`/grand-tests/${id}/section/${Number(section) + 1}`);
+          } else {
+            setShowSubmitTestButton(true);
+          }
+        } else {
+          throw new Error("Failed to submit section");
+        }
+      } catch (error) {
+        console.error("Error submitting section:", error);
+        toast.error("Failed to submit section");
+      }
     }
   };
 
@@ -625,7 +634,7 @@ export default function GrandTestPage({
                     </div>
                   </button>
                   <button
-                    onClick={() => router.push(`/grand-tests/${id}/results`)}
+                    onClick={() => router.push("/grand-tests")}
                     className="flex-1 pushable bg-[#c9c99c]"
                   >
                     <div className="front bg-[#ecec7c] py-2 text-foreground">
@@ -681,7 +690,9 @@ export default function GrandTestPage({
         <div className="container mx-auto py-4 px-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <SidebarTrigger className="p-3 rounded-full w-10 h-10" />
-            <div className="text-lg font-semibold">Grand Test - NEET PG</div>
+            <div className="text-lg font-semibold">
+              Section {section} - Time Remaining: {formatTime(remainingSeconds)}
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {!showReviewMode ? (
@@ -690,11 +701,21 @@ export default function GrandTestPage({
                 className="text-[#6FCCCA] bg-transparent shadow-none p-0"
                 disabled={testCompleted}
               >
-                {currentSection === 5 ? "Submit Test" : "Submit Section"}
+                Submit Section
               </button>
             ) : (
               <button onClick={toggleReviewMode} className="text-[#6FCCCA]">
                 See results
+              </button>
+            )}
+
+            {!showReviewMode && showSubmitTestButton && (
+              <button
+                onClick={submitTest}
+                className="text-[#6FCCCA] bg-transparent shadow-none p-0"
+                disabled={testCompleted}
+              >
+                Submit Test
               </button>
             )}
           </div>
@@ -708,7 +729,7 @@ export default function GrandTestPage({
               <div>
                 <div className="flex items-center gap-2 flex-wrap max-w-4xl">
                   {questions.map((_, index) => {
-                    const answer = userAnswers[index];
+                    const answer = userAnswers[_.question_order - 1];
                     const isAnswered = answer?.selectedOption !== null;
                     const isCurrent = index === currentQuestionIndex;
                     const isCorrect = answer?.isCorrect || false;
@@ -884,9 +905,9 @@ export default function GrandTestPage({
                       <Button
                         onClick={submitSection}
                         className="bg-[#6FCCCA] hover:bg-[#6FCCCA]/60 font-bold text-white"
-                        disabled={true}
+                        disabled={false}
                       >
-                        Submit Test
+                        Submit Section
                       </Button>
                     ) : (
                       <button
