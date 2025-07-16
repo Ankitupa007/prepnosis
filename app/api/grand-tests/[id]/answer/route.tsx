@@ -25,7 +25,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const { attemptId, answers, currentSection } = body;
+    const { attemptId, answers, questionId } = body;
 
     const { data: test, error: testError } = await supabase
       .from("grand_tests")
@@ -37,7 +37,7 @@ export async function POST(
 
     const userAnswerInserts = [];
     for (const answer of answers) {
-      const { question_id, selectedOption, isCorrect } = answer;
+      const { questionId, selectedOption, isCorrect } = answer;
       let marksAwarded = 0;
       if (selectedOption !== null && selectedOption !== undefined) {
         if (isCorrect) {
@@ -49,7 +49,7 @@ export async function POST(
 
       userAnswerInserts.push({
         attempt_id: attemptId,
-        question_id,
+        question_id: questionId,
         selected_option: selectedOption,
         is_correct: isCorrect,
         marks_awarded: marksAwarded,

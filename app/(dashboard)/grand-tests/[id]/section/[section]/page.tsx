@@ -1,6 +1,7 @@
 // app/grand-tests/[id]/page.tsx
 
 "use client";
+import BookmarkButton from "@/components/bookmark-button";
 import { CircleProgress } from "@/components/common/CircleProgress";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import SubjectIcons from "@/components/common/SubjectIcons";
@@ -115,7 +116,7 @@ export default function SectionPage({
   const [testStarted, setTestStarted] = useState(false);
   const [testCompleted, setTestCompleted] = useState(false);
   const [isSubmitted, setSubmitted] = useState(false);
-  const [showSubmitTestButton, setShowSubmitTestButton] = useState(false);
+  const [showSubmitTestModel, setShowSubmitTestModel] = useState(false);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [showReviewMode, setShowReviewMode] = useState(false);
@@ -252,7 +253,7 @@ export default function SectionPage({
   };
 
   // Handle answer selection
-  const handleAnswerSelect = async (selectedOption: number) => {
+  const handleAnswerSelect = async (selectedOption: number | null) => {
     if (showReviewMode || testCompleted) return;
     const currentQuestion = questions[currentQuestionIndex];
     const isCorrect =
@@ -264,7 +265,7 @@ export default function SectionPage({
         : answer
     );
     setUserAnswers(updatedAnswers);
-
+    console.log(currentQuestion.question_id);
     try {
       await fetch(`/api/grand-tests/${id}/answer`, {
         method: "POST",
@@ -318,10 +319,12 @@ export default function SectionPage({
       if (response.ok) {
         const data = await response.json();
         console.log(data);
+        setShowSubmitTestModel(false);
         setTestCompleted(true);
         setSubmitted(true);
         setShowReviewMode(true);
         setShowExplanation(true);
+
         toast.success("Test submitted successfully!");
       } else {
         throw new Error("Failed to submit section");
@@ -356,7 +359,7 @@ export default function SectionPage({
           if (section < 5) {
             router.push(`/grand-tests/${id}/section/${Number(section) + 1}`);
           } else {
-            setShowSubmitTestButton(true);
+            setShowSubmitTestModel(true);
           }
         } else {
           throw new Error("Failed to submit section");
@@ -413,6 +416,38 @@ export default function SectionPage({
     return <span dangerouslySetInnerHTML={{ __html: boldText }} />;
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if user is not typing in an input field
+      const target = event.target as HTMLElement;
+      const isInputField =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.contentEditable === "true";
+
+      if (isInputField) return;
+
+      switch (event.key) {
+        case "ArrowLeft":
+          event.preventDefault();
+          previousQuestion();
+          break;
+        case "ArrowRight":
+          event.preventDefault();
+          nextQuestion();
+          break;
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentQuestionIndex, questions.length, test?.test_mode, testCompleted]);
+
   if (isLoading) {
     return (
       <div className="container mx-auto">
@@ -431,7 +466,7 @@ export default function SectionPage({
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Test Not Found
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-foreground/70 mb-6">
             The test you're looking for doesn't exist or has been removed.
           </p>
           <Button onClick={() => router.push("/custom-test/create")}>
@@ -502,7 +537,7 @@ export default function SectionPage({
                     >
                       {test.total_questions}
                     </div>
-                    <div className="text-xs text-gray-600">Questions</div>
+                    <div className="text-xs text-foreground/70">Questions</div>
                   </div>
                   <div className="text-center p-3 bg-secondary rounded-xl">
                     <div
@@ -511,7 +546,7 @@ export default function SectionPage({
                     >
                       {test.total_marks}
                     </div>
-                    <div className="text-xs text-gray-600">Points</div>
+                    <div className="text-xs text-foreground/70">Points</div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-center p-3 bg-secondary rounded-xl">
@@ -608,10 +643,12 @@ export default function SectionPage({
                   </div>
                   {results.unanswered > 0 && (
                     <div className="flex items-center space-x-2">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-foreground/70">
                         {results.unanswered}
                       </div>
-                      <div className="text-sm text-gray-600">Unanswered</div>
+                      <div className="text-sm text-foreground/70">
+                        Unanswered
+                      </div>
                     </div>
                   )}
                 </div>
@@ -631,8 +668,8 @@ export default function SectionPage({
                     onClick={() => router.push(`/grand-tests/${id}/results`)}
                     className="flex-1 pushable bg-[#c9c99c]"
                   >
-                    <div className="front bg-[#ecec7c] py-2 text-foreground">
-                      <p className="flex justify-center items-center text-foreground text-base font-semibold">
+                    <div className="front bg-[#ecec7c] py-2 text-black">
+                      <p className="flex justify-center items-center text-black text-base font-semibold">
                         <Trophy className="h-4 w-4 mr-2" />
                         See Ranking
                       </p>
@@ -680,7 +717,26 @@ export default function SectionPage({
         </div>
       )}
 
-      <header className="bg-white/80 backdrop-blur-2xl border-b border-gray-200/50 sticky top-0 z-10">
+      {!showReviewMode && showSubmitTestModel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
+          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-8 text-center">
+            <Award className="mx-auto mb-4 text-yellow-500" size={40} />
+            <h2 className="text-2xl font-bold mb-2">Test Submitted!</h2>
+            <p className="text-gray-700 mb-6">
+              Test is completed
+              <br />
+              Please submit your test
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button className="w-full" onClick={submitTest}>
+                Submit Test
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <header className="bg-background/80 backdrop-blur-sm border-border border-b sticky top-0 z-10">
         <div className="container mx-auto py-4 flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <SidebarTrigger
@@ -691,7 +747,7 @@ export default function SectionPage({
               Section {section} : {formatTime(remainingSeconds)}
             </div>
           </div>
-         
+
           <div className="flex items-center gap-4">
             {!showReviewMode ? (
               <button
@@ -706,248 +762,310 @@ export default function SectionPage({
                 See results
               </button>
             )}
-
-            {!showReviewMode && showSubmitTestButton && (
-              <button
-                onClick={submitTest}
-                className="text-[#6FCCCA] bg-transparent shadow-none p-0"
-                disabled={testCompleted}
-              >
-                Submit Test
-              </button>
-            )}
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto mt-4">
-        <div className="py-2 px-6 w-full max-w-4xl lg:max-w-2xl">
-          <div className="">
-            <div className="border-none shadow-none max-w-4xl">
-              <div>
-                <div className="flex items-center gap-2 flex-wrap max-w-4xl">
-                  {questions.map((_, index) => {
-                    const answer = userAnswers[_.question_order - 1];
-                    const isAnswered = answer?.selectedOption !== null;
-                    const isCurrent = index === currentQuestionIndex;
-                    const isCorrect = answer?.isCorrect || false;
+      <div className="max-w-7xl mx-auto mt-4">
+        {testCompleted && showReviewMode && (
+          <div className="px-6">
+            <p className="font-semibold">Sections</p>
+            <div className="flex items-center justify-start gap-2 mt-4">
+              {[1, 2, 3, 4, 5].map((sec) => (
+                <button
+                  key={sec}
+                  onClick={() =>
+                    router.push(`/grand-tests/${id}/section/${sec}`)
+                  }
+                  className={`px-3 py-2 rounded-md text-xs font-semibold transition ${
+                    Number(section) === sec
+                      ? "bg-primary text-background"
+                      : "bg-secondary text-foreground hover:bg-gray-300"
+                  }`}
+                >
+                  {sec}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <section className="flex gap-2">
+          {/* Progress Header */}
+          <div className="py-2 px-6 w-1/2 max-w-2xl mx-auto">
+            <div className="">
+              <div className="border-none shadow-none w-full mx-auto max-w-4xl">
+                <div>
+                  <div className="flex items-center gap-2 w-full mx-auto flex-wrap py-4 max-w-2xl">
+                    {questions.map((_, index) => {
+                      const answer = userAnswers[_.question_order - 1];
+                      const isAnswered = answer?.selectedOption !== null;
+                      const isCurrent = index === currentQuestionIndex;
+                      const isCorrect = answer?.isCorrect || false;
 
-                    const getButtonStyle = () => {
-                      if (isCurrent) {
-                        return isAnswered &&
-                          isCorrect &&
-                          (test.test_mode === "regular" || showReviewMode)
-                          ? "bg-green-500 p-1 border-green-500"
-                          : isAnswered &&
+                      const getButtonStyle = () => {
+                        if (isCurrent) {
+                          if (isAnswered && isCorrect && showReviewMode) {
+                            return "bg-green-300/50 dark:bg-green-600/50 p-1 border-[#66cccf] border-2";
+                          } else if (
+                            isAnswered &&
                             !isCorrect &&
-                            (test.test_mode === "regular" || showReviewMode)
-                          ? "bg-red-300 p-1 border-red-300"
-                          : "bg-gray-300 p-1 border-gray-300";
-                      }
-                      if (
-                        isAnswered &&
-                        (showReviewMode || test.test_mode === "regular")
-                      ) {
-                        return isCorrect
-                          ? "bg-green-500 border-green-500"
-                          : "bg-red-300 border-red-300";
-                      }
-                      return isAnswered
-                        ? "bg-[#6FCCCA] border-[#6FCCCA]"
-                        : "bg-white border-gray-300 hover:border-gray-400";
-                    };
+                            showReviewMode
+                          ) {
+                            return "bg-red-200/60 dark:bg-red-600/30 p-1 border-red-300";
+                          } else if (isAnswered) {
+                            return "bg-[#6FCCCA] p-1 border-[#6FCCCA]";
+                          } else {
+                            return "border-[#66cccf] p-1 border-2";
+                          }
+                        }
 
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => navigateToQuestion(index)}
-                        className={`w-2 h-2 text-xs rounded-full border-2 transition-colors ${getButtonStyle()}`}
-                      />
-                    );
-                  })}
+                        // Show correct/incorrect colors only in review modes
+                        if (
+                          (test.test_mode === "exam" && testCompleted) ||
+                          (test.test_mode === "regular" && isAnswered)
+                        ) {
+                          if (isAnswered) {
+                            return isCorrect
+                              ? "bg-green-300/60 border-none"
+                              : "bg-red-300/60 border-none";
+                          }
+                        }
+                        // Default answered/unanswered colors
+                        return isAnswered
+                          ? "bg-[#6FCCCA] border-[#6FCCCA]"
+                          : "bg-secondary border-none";
+                      };
+
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => navigateToQuestion(index)}
+                          className={`w-10 h-10 flex flex-shrink-0 justify-center font-bold items-center text-xs rounded-full border-2 transition-colors  ${getButtonStyle()}`}
+                        >
+                          {_.question_order}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
-            <Card className="shadow-none border-none">
-              <CardHeader>
-                <CardTitle className="flex items-start gap-3 pt-0">
-                  <p className="flex-1 text-xl font-semibold">
-                    {currentQuestion.question_order}.{" "}
-                    {currentQuestion.question.question_text}
-                  </p>
-                </CardTitle>
-                {currentQuestion.question.images && (
-                  <div className="py-2 rounded-lg">
-                    <Image
-                      src={`${currentQuestion.question.images[0]}`}
-                      width="400"
-                      height="400"
-                      alt="question_image"
-                      className="rounded-md w-full"
+          {/* Questions */}
+          <div className="mx-auto flex justify-center w-full max-w-4xl px-2">
+            {/* Question Panel */}
+            <div className="max-w-2xl w-full">
+              <Card className="shadow-none border-none">
+                <CardHeader>
+                  <CardTitle className="flex items-start justify-between gap-3 pt-0">
+                    <p className="flex-1 text-xl font-semibold">
+                      {currentQuestion.question_order}.{" "}
+                      {currentQuestion.question.question_text}
+                    </p>
+                    {/* Add bookmark button here */}
+                    {/* <div className="flex-shrink-0">
+                    <BookmarkButton
+                      questionId={currentQuestion.question.id}
+                      size="sm"
+                      variant="ghost"
                     />
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup
-                  value={currentAnswer?.selectedOption?.toString() || ""}
-                  onValueChange={(value) => handleAnswerSelect(parseInt(value))}
-                  disabled={showReviewMode || testCompleted}
-                >
-                  <div className="space-y-3">
-                    {[
-                      {
-                        value: "1",
-                        text: currentQuestion.question.option_a,
-                        label: "A",
-                      },
-                      {
-                        value: "2",
-                        text: currentQuestion.question.option_b,
-                        label: "B",
-                      },
-                      {
-                        value: "3",
-                        text: currentQuestion.question.option_c,
-                        label: "C",
-                      },
-                      {
-                        value: "4",
-                        text: currentQuestion.question.option_d,
-                        label: "D",
-                      },
-                    ].map((option) => {
-                      const isSelected =
-                        currentAnswer?.selectedOption ===
-                        parseInt(option.value);
-                      const isCorrect =
-                        parseInt(option.value) ===
-                        currentQuestion.question.correct_option;
-                      const showResult = shouldShowExplanation;
-                      const isDisabled = showReviewMode || testCompleted;
-
-                      return (
-                        <div key={option.value}>
-                          <Label
-                            htmlFor={option.value}
-                            className={`flex justify-between items-center space-x-3 py-4 px- rounded-lg border transition-colors ${
-                              showResult
-                                ? isCorrect
-                                  ? "bg-green-50 border-none"
-                                  : isSelected && !isCorrect
-                                  ? "bg-red-50 border-none"
-                                  : "border-none bg-white shadow"
-                                : isSelected
-                                ? "bg-[#6FCCCA]/30 border-none"
-                                : "bg-white shadow border-none hover:bg-gray-100"
-                            } ${
-                              isDisabled ? "cursor-not-allowed opacity-75" : ""
-                            }`}
-                          >
-                            <div className="flex items-center space-x-3 py-1 px-3 rounded-lg w-full">
-                              <RadioGroupItem
-                                value={option.value}
-                                id={option.value}
-                                disabled={isDisabled}
-                              />
-                              <span className="font-medium text-sm px-2 py-1 rounded">
-                                {option.label}
-                              </span>
-                              <span className="flex-1">
-                                {renderBoldText(option.text)}
-                              </span>
-                              {showResult && isCorrect && (
-                                <span className="text-xs text-green-500 font-bold">
-                                  Correct
-                                </span>
-                              )}
-                              {showResult && isSelected && !isCorrect && (
-                                <span className="text-xs text-red-500 font-bold">
-                                  Incorrect
-                                </span>
-                              )}
-                            </div>
-                          </Label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </RadioGroup>
-                <div className="flex justify-between pt-4 border-t">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={previousQuestion}
-                      className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed"
-                      disabled={currentQuestionIndex === 0}
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-2" />
-                      Previous
-                    </button>
-                  </div>
-                  <div className="flex gap-2">
-                    {showReviewMode ? (
-                      <button
-                        onClick={nextQuestion}
-                        className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed"
-                        disabled={currentQuestionIndex === questions.length - 1}
-                      >
-                        Next
-                        <ChevronRight className="h-4 w-4 ml-2" />
-                      </button>
-                    ) : currentQuestionIndex === questions.length - 1 ? (
-                      <Button
-                        onClick={submitSection}
-                        className="bg-[#6FCCCA] hover:bg-[#6FCCCA]/60 font-bold text-white"
-                        disabled={false}
-                      >
-                        Submit Section
-                      </Button>
-                    ) : (
-                      <button
-                        onClick={nextQuestion}
-                        className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold"
-                        disabled={
-                          currentQuestionIndex === questions.length - 1 &&
-                          test.test_mode === "regular"
-                        }
-                      >
-                        Next
-                        <ChevronRight className="h-4 w-4 ml-2" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                {shouldShowExplanation && (
-                  <div className="mt-6 py-4 border-none rounded-lg w-full">
-                    <h4 className="font-medium text-sm text-gray-400 mb-2">
-                      Explanation
-                    </h4>
-                    <p className="text-gray-800 text-sm/7 whitespace-pre-wrap py-4 prose w-full">
-                      {renderBoldText(currentQuestion.question.explanation)}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <p className="text-xs text-gray-600 font-bold">
-                        {currentQuestion.question.subjects?.name}
-                      </p>
-                      <span className="text-sm text-gray-600">•</span>
-                      <span className="text-xs text-gray-600">
-                        {currentQuestion.question.topics?.name}
-                      </span>
+                  </div> */}
+                  </CardTitle>
+                  {currentQuestion.question.images && (
+                    <div className="w-full py-4">
+                      <Image
+                        src={`${currentQuestion.question.images[0]}`}
+                        alt="QuestionImage"
+                        width={800}
+                        height={800}
+                        className="rounded-2xl"
+                      />
                     </div>
-                    <p className="text-xs py-4">
-                      {currentQuestion.question_id}
-                    </p>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Answer Options */}
+                  <RadioGroup
+                    value={currentAnswer?.selectedOption?.toString() || ""}
+                    onValueChange={(value) =>
+                      handleAnswerSelect(parseInt(value))
+                    }
+                    disabled={shouldShowExplanation || showReviewMode}
+                  >
+                    <div className="space-y-3">
+                      {[
+                        {
+                          value: "1",
+                          text: currentQuestion.question.option_a,
+                          label: "A",
+                        },
+                        {
+                          value: "2",
+                          text: currentQuestion.question.option_b,
+                          label: "B",
+                        },
+                        {
+                          value: "3",
+                          text: currentQuestion.question.option_c,
+                          label: "C",
+                        },
+                        {
+                          value: "4",
+                          text: currentQuestion.question.option_d,
+                          label: "D",
+                        },
+                      ].map((option) => {
+                        const isSelected =
+                          currentAnswer?.selectedOption ===
+                          parseInt(option.value);
+                        const isCorrect =
+                          parseInt(option.value) ===
+                          currentQuestion.question.correct_option;
+                        const showResult = shouldShowExplanation;
+                        const isDisabled = showReviewMode;
+
+                        return (
+                          <div key={option.value} className="pushable relative">
+                            <Label
+                              id={`label-${option.value}`}
+                              htmlFor={option.value}
+                              className={`front text-sm flex justify-between items-center space-x-3 py-4 rounded-lg border relative ${
+                                showResult
+                                  ? isCorrect
+                                    ? "bg-green-300/50 dark:bg-green-600/50 border-none"
+                                    : isSelected && !isCorrect
+                                    ? "bg-red-200 dark:bg-red-600/30 border-none"
+                                    : "border-none bg-background shadow"
+                                  : isSelected
+                                  ? "bg-[#6FCCCA]/30 border-none"
+                                  : "bg-background shadow border-none hover:bg-secondary"
+                              } ${
+                                isDisabled
+                                  ? "cursor-not-allowed opacity-75"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3 py-1 px-3 rounded-lg w-full">
+                                <RadioGroupItem
+                                  value={option.value}
+                                  id={option.value}
+                                  disabled={isDisabled}
+                                  className="text-gray-500"
+                                />
+                                <p className="font-medium px-2 py-1 rounded">
+                                  {option.label}
+                                </p>
+                                <span className="flex-1">{option.text}</span>
+                                {showResult && isCorrect && (
+                                  <span className="text-xs text-green-700 dark:text-green-300 font-bold">
+                                    correct
+                                  </span>
+                                )}
+                                {showResult && isSelected && !isCorrect && (
+                                  <span className="text-xs text-red-600 dark:text-red-300 font-bold">
+                                    incorrect
+                                  </span>
+                                )}
+                              </div>
+                            </Label>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Clear Selection Button */}
+                    {!shouldShowExplanation && !showReviewMode && (
+                      <div className="flex justify-start">
+                        <button
+                          type="button"
+                          onClick={() => handleAnswerSelect(null)}
+                          className="text-primary"
+                        >
+                          Clear Selection
+                        </button>
+                      </div>
+                    )}
+                  </RadioGroup>
+
+                  {/* Navigation Buttons */}
+                  <div className="flex justify-between pt-4 border-t">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={previousQuestion}
+                        className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed"
+                        disabled={currentQuestionIndex === 0}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-2" />
+                        Previous
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      {showReviewMode ? (
+                        <button
+                          onClick={nextQuestion}
+                          className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed"
+                          disabled={
+                            currentQuestionIndex === questions.length - 1
+                          }
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4 ml-2" />
+                        </button>
+                      ) : currentQuestionIndex === questions.length - 1 ? (
+                        <Button
+                          onClick={submitTest}
+                          className="bg-[#6FCCCA] hover:bg-[#6FCCCA]/60 font-bold text-white"
+                        >
+                          Submit Test
+                        </Button>
+                      ) : (
+                        <button
+                          onClick={nextQuestion}
+                          className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold "
+                          disabled={
+                            currentQuestionIndex === questions.length - 1 &&
+                            test.test_mode === "regular"
+                          }
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4 ml-2" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  {/* Explanation */}
+                  {shouldShowExplanation && (
+                    <div className="mt-6 py-4 border-none rounded-lg w-full">
+                      <h4 className="font-medium text-sm uppercase text-foreground/30  mb-2">
+                        Explanation
+                      </h4>
+                      <p className=" py-4 leading-relaxed whitespace-pre-wrap text-foreground/70 w-full break-words">
+                        {renderBoldText(currentQuestion.question.explanation)}
+                      </p>
+                      <div className="flex flex-col items-start gap-2 mt-2 text-foreground/70">
+                        <p className="text-xs font-bold">
+                          {/* {currentQuestion.question.subjects.name} */}
+                        </p>
+                        {/* <span className="text-sm">•</span> */}
+                        <span className="text-xs">
+                          {/* {currentQuestion.question.topics.name} */}
+                        </span>
+                      </div>
+                      <p className="text-xs py-4 text-foreground/50 flex items-center gap-2">
+                        {currentQuestion.question_id}{" "}
+                        <CopyButton
+                          text={currentQuestion.question_id}
+                          size="sm"
+                        />
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

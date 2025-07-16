@@ -1,108 +1,23 @@
 // app/grand-tests/[id]/page.tsx
-
 "use client";
-import { CircleProgress } from "@/components/common/CircleProgress";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import SubjectIcons from "@/components/common/SubjectIcons";
 import CopyButton from "@/components/copy-to-clipboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import UserHeader from "@/components/user-header";
 import { useAuth } from "@/lib/auth-context";
 import {
-  ArrowLeft,
-  Award,
-  BookOpen,
+  ArrowRight,
   CheckSquare,
-  ChevronLeft,
-  ChevronRight,
   ClipboardPlus,
-  FileText,
-  FilterX,
   Play,
   Trophy,
 } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
-
-interface Question {
-  id: string;
-  question_order: number;
-  question_text: string;
-  explanation: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  images: string[];
-  correct_option: 1 | 2 | 3 | 4;
-  subject_id: string;
-  subjects?: {
-    id: string;
-    name: string;
-  };
-  topics?: {
-    id: string;
-    name: string;
-  };
-  topic_id: string;
-  difficulty_level: string;
-}
-
-interface TestQuestion {
-  correct_option: number;
-  id: string;
-  question_id: string;
-  question_order: number;
-  marks: number;
-  section_number?: number;
-  question: Question;
-  user_answer?: {
-    selected_option: number | null;
-    is_marked_for_review: boolean;
-  };
-}
-
-interface Test {
-  id: string;
-  title: string;
-  description: string;
-  test_mode: "regular" | "exam";
-  total_questions: number;
-  total_marks: number;
-  subjects: string[] | "all";
-  share_code?: string;
-  user_attempt?: {
-    id: string;
-    started_at: string;
-    submitted_at: string | null;
-    is_completed: boolean;
-    total_score: number | null;
-    section_times: {
-      section: number;
-      start_time: string | null;
-      remaining_seconds: number;
-    }[];
-  };
-}
-
-interface UserAnswer {
-  questionId: string;
-  selectedOption: number | null;
-  isCorrect?: boolean;
-}
+import { Test } from "@/lib/types/grand-tests-types";
 
 export default function GrandTestPage({
   params,
@@ -116,9 +31,6 @@ export default function GrandTestPage({
   const [testStarted, setTestStarted] = useState(false);
   const [testCompleted, setTestCompleted] = useState(false);
   const [attemptId, setAttemptId] = useState<string | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [showReviewMode, setShowReviewMode] = useState(false);
-  const [currentSection, setCurrentSection] = useState(1);
   const { id } = use(params);
 
   // Fetch test data
@@ -203,10 +115,6 @@ export default function GrandTestPage({
     );
   }
 
-  // Show loading spinner while starting the test
-
-  // Test start screen (only shown if test is not completed)
-
   if (!testStarted && !testCompleted) {
     return (
       <div className="container mx-auto">
@@ -275,45 +183,38 @@ export default function GrandTestPage({
                     <div className="text-xs text-gray-600">Points</div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center text-center p-3 bg-secondary rounded-xl">
-                  <div className="text-xs text-gray-400">Share</div>
-                  <div
-                    className="text-sm font-bold"
-                    style={{ color: "#6FCCCA" }}
-                  >
-                    {test.share_code || "N/A"}
-                  </div>
-                  <CopyButton text={test.share_code || ""} />
-                </div>
               </div>
               <div className="px-6 pb-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Mode
                   </span>
-                  <span
-                    className="text-xs px-3 py-1 rounded-full font-medium"
-                    style={{
-                      backgroundColor:
-                        test.test_mode === "regular" ? "#6FCCCA20" : "#f3f4f6",
-                      color:
-                        test.test_mode === "regular" ? "#6FCCCA" : "#6b7280",
-                    }}
-                  >
-                    {test.test_mode === "regular" ? "Regular" : "Exam"}
+                  <span className="text-xs px-3 py-1 rounded-full font-medium bg-[#66cccf] text-foreground">
+                    Exam
                   </span>
                 </div>
               </div>
               <p></p>
               <div className="p-6 pt-0">
-                <button
-                  onClick={startTest}
-                  className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
-                  disabled={testCompleted}
-                >
-                  <Play className="w-5 h-5 transition-transform" />
-                  Start Test
-                </button>
+                {test.user_attempt ? (
+                  <button
+                    onClick={startTest}
+                    className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
+                    disabled={testCompleted}
+                  >
+                    Continue test
+                    <ArrowRight className="w-5 h-5 transition-transform" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={startTest}
+                    className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
+                    disabled={testCompleted}
+                  >
+                    <Play className="w-5 h-5 transition-transform" />
+                    Start Test
+                  </button>
+                )}
               </div>
               <div className="h-1" style={{ backgroundColor: "#6" }}></div>
             </div>
@@ -372,11 +273,11 @@ export default function GrandTestPage({
               </div>
               <div className="px-6 pb-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Mode
                   </span>
-                  <span className="text-xs px-3 py-1 rounded-full font-medium bg-primary/60 text-background">
-                    {test.test_mode === "regular" ? "Regular" : "Exam"}
+                  <span className="text-xs px-3 py-1 rounded-full font-medium bg-[#66cccf] text-background">
+                    Exam
                   </span>
                 </div>
               </div>
@@ -385,7 +286,9 @@ export default function GrandTestPage({
                 {testCompleted ? (
                   <div className="flex flex-col gap-4">
                     <button
-                      onClick={() => router.push(`/grand-tests/${id}/results`)}
+                      onClick={() =>
+                        router.push(`/grand-tests/${id}/section/1`)
+                      }
                       className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
                     >
                       <CheckSquare className="w-5 h-5 transition-transform" />
@@ -398,7 +301,7 @@ export default function GrandTestPage({
                       <Trophy className="w-5 h-5 transition-transform" />
                       View Leaderboard
                     </button>
-                    <button 
+                    <button
                       onClick={() => router.push(`/grand-tests/`)}
                       className="text-primary flex w-full justify-center items-center gap-2 py-2"
                     >

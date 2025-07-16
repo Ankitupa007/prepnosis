@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
           title: test.title,
           description: test.description,
           test_mode: test.test_mode,
+          exam_pattern: test.exam_pattern,
           total_questions: test.total_questions,
           total_marks: test.total_marks,
           created_at: test.created_at,
