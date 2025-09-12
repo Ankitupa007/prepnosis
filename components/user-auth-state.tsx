@@ -1,5 +1,4 @@
 "use client";
-
 import { useAuth } from "@/lib/auth-context";
 import React, { useTransition } from "react";
 import { Button } from "./ui/button";
@@ -20,12 +19,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import LoadingSpinner from "./common/LoadingSpinner";
 import { LogIn } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function UserAuthState() {
   const { user } = useAuth();
   const [isPending, startTransision] = useTransition();
   const queryClient = useQueryClient();
-
+  const router = useRouter()
   async function removeUser() {
     startTransision(async () => {
       const response = await logOut();
@@ -34,6 +34,7 @@ export default function UserAuthState() {
         return;
       }
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      router.push("/login")
       toast.success("you're Logged Out!");
     });
   }

@@ -32,17 +32,17 @@ export default function BookmarkButton({
         const response = await fetch(`/api/bookmarks/`)
         if (response.ok) {
           const data = await response.json()
-          console.log('API Response:', data) // Debug: Check API response structure
+          // console.log('API Response:', data) // Debug: Check API response structure
           const { allBookmarks } = data
-          console.log('All Bookmarks:', allBookmarks) // Debug: Check bookmarks array
-          console.log('Current Question ID:', questionId) // Debug: Check current question ID
+          // console.log('All Bookmarks:', allBookmarks) // Debug: Check bookmarks array
+          // console.log('Current Question ID:', questionId) // Debug: Check current question ID
 
           if (Array.isArray(allBookmarks)) {
             const bookmarkExists = allBookmarks.some((bookmark: any) => {
-              console.log('Comparing:', bookmark.question_id, 'with', questionId) // Debug comparison
+              // console.log('Comparing:', bookmark.question_id, 'with', questionId) // Debug comparison
               return bookmark.question_id === questionId
             })
-            console.log('Bookmark exists:', bookmarkExists)
+            // console.log('Bookmark exists:', bookmarkExists)
             setIsBookmarked(bookmarkExists)
           } else {
             console.error('allBookmarks is not an array:', allBookmarks)

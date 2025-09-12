@@ -126,6 +126,15 @@ export async function POST(
       throw updateError;
     }
 
+    const { data, error } = await supabase.auth.updateUser({
+      data: {
+        current_section: isLastSection ? null : Number(sectionNumber) + 1,
+        is_completed: false,
+        submitted_at: null,
+      },
+});
+
+
     return NextResponse.json({
       message: `Section ${sectionNumber} submitted successfully`,
       nextSection: nextSection?.section || null,

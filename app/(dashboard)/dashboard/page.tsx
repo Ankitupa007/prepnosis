@@ -1,17 +1,7 @@
-import { DailyQuestionCard } from "@/components/daily-question";
-import { Badge } from "@/components/ui/badge";
+import {DailyQuestionCard} from "@/components/daily-question";
+import {Badge} from "@/components/ui/badge";
 import UserHeader from "@/components/user-header";
-import { createClient } from "@/supabase/server";
-import {
-  BookCheck,
-  ClipboardPlus,
-  FileQuestion,
-  FileText,
-  ArrowRight,
-  TrendingUp,
-  Calendar,
-  Hexagon,
-} from "lucide-react";
+import {ArrowRight, BookCheck, Calendar, ClipboardPlus, FileText, Hexagon, TrendingUp,} from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -147,76 +137,11 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Welcome Section */}
+        {/* Welcome, Section */}
         <section className="w-full">
           <DailyQuestionCard />
-          {/* <div className="container px-4 md:px-6 mx-auto">
-            <div className="flex flex-col items-center space-y-8 text-center">
-              <div className="space-y-6 max-w-4xl">
-                <div className="space-y-4">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-[#6FCCCA] to-[#4A9B99] bg-clip-text text-transparent sm:text-5xl md:text-6xl lg:text-7xl/none tracking-tight">
-                    Start Your NEET-PG & INICET Journey
-                  </h1>
-                  <p className="mx-auto max-w-[700px] text-lg text-gray-600 leading-relaxed">
-                    Master medical entrance exams with our comprehensive collection of
-                    <span className="font-semibold text-[#6FCCCA]"> 194,000+ MCQs</span> designed
-                    for NEET-PG & INICET success.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-2xl mx-auto">
-                  <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:border-[#6FCCCA]/30 transition-colors">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Target className="h-4 w-4 text-[#6FCCCA]" />
-                      <span className="text-sm font-medium text-gray-600">Tests Taken</span>
-                    </div>
-                    <p className="text-2xl font-bold text-foreground">24</p>
-                  </div>
-                  <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:border-[#6FCCCA]/30 transition-colors">
-                    <div className="flex items-center gap-2 mb-1">
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                      <span className="text-sm font-medium text-gray-600">Accuracy</span>
-                    </div>
-                    <p className="text-2xl font-bold text-foreground">78%</p>
-                  </div>
-                  <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:border-[#6FCCCA]/30 transition-colors">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Award className="h-4 w-4 text-orange-500" />
-                      <span className="text-sm font-medium text-gray-600">Rank</span>
-                    </div>
-                    <p className="text-2xl font-bold text-foreground">#156</p>
-                  </div>
-                  <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:border-[#6FCCCA]/30 transition-colors">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Clock className="h-4 w-4 text-blue-500" />
-                      <span className="text-sm font-medium text-gray-600">Streak</span>
-                    </div>
-                    <p className="text-2xl font-bold text-foreground">7 days</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> */}
         </section>
       </main>
-    </div>
-  );
-}
-
-async function UserData() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const userData = user?.user_metadata;
-
-  return (
-    <div className="max-w-2xl w-full mx-auto space-y-4">
-      <div className="text-center">
-        <h2 className="text-sm md:text-sm font-bold text-foreground">
-          Welcome, {userData?.full_name || "Student"}!
-        </h2>
-      </div>
     </div>
   );
 }

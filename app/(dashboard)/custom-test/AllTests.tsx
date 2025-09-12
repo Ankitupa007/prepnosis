@@ -1,30 +1,24 @@
 "use client";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ShareCodeInput from "@/components/share-code-input";
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useCustomTests } from "@/hooks/tests/useTests";
-import { CustomTest, TestAttempt } from "@/lib/types/test";
-import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, ClipboardPlus, Plus, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import {Input} from "@/components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {useCustomTests} from "@/hooks/tests/useTests";
+import {CustomTest, TestAttempt} from "@/lib/types/test";
+import {useQueryClient} from "@tanstack/react-query";
+import {BookOpen, ClipboardPlus, Plus, Search} from "lucide-react";
+import {useRouter} from "next/navigation";
+import {useEffect, useMemo, useState} from "react";
+import {toast} from "sonner";
 import TestCard from "./TestCard";
 
 export default function AllTests() {
@@ -202,11 +196,11 @@ export default function AllTests() {
               <h3 className="text-lg font-medium text-foreground mb-2">
                 Failed to load tests
               </h3>
-              <p className="text-muted-foreground mb-6">
-                {customTestsError instanceof Error
-                  ? customTestsError.message
-                  : "Something went wrong"}
-              </p>
+              {/*<p className="text-muted-foreground mb-6">*/}
+              {/*  {customTestsError typeof Error*/}
+              {/*    ? customTestsError.message*/}
+              {/*    : "Something went wrong"}*/}
+              {/*</p>*/}
               <Button
                 onClick={refetchCustomTests}
                 className="bg-[#66C3C1] hover:bg-[#5ab5b3] text-white dark:bg-[#66C3C1] dark:hover:bg-[#5ab5b3]"

@@ -1,12 +1,9 @@
 "use client";
-import { useAuth } from "@/lib/auth-context";
-import React, { useTransition } from "react";
-import { Button } from "./ui/button";
+import {useAuth} from "@/lib/auth-context";
 import Link from "next/link";
 
 export default function HomeCTABtn() {
   const { user } = useAuth();
-  const [isPending, startTransision] = useTransition();
 
   return (
     <div className="py-8">

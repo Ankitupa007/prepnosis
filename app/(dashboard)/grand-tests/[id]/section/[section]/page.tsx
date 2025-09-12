@@ -164,16 +164,16 @@ export default function SectionPage({
         setTest(data.test);
         if (data.current_section) {
           const sections = splitIntoSections(data.questions, 5);
-          console.log(sections[section - 1]);
+          // console.log(sections[section - 1]);
           // setQuestions(data.questions);
           setQuestions(sections[section - 1]);
           setCurrentSection(data.current_section || section);
           //   setCurrentQuestionIndex(sections[section - 1][0].question_order);
-          console.log(sections[section - 1][0].question_order);
+          // console.log(sections[section - 1][0].question_order);
         }
         setRemainingSeconds(data.remaining_seconds || 2520);
 
-        console.log("Fetched test data:", data);
+        // console.log("Fetched test data:", data);
 
         if (data.test.user_attempt?.is_completed) {
           setTestCompleted(true);
@@ -318,7 +318,7 @@ export default function SectionPage({
       });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         setShowSubmitTestModel(false);
         setTestCompleted(true);
         setSubmitted(true);
@@ -354,7 +354,7 @@ export default function SectionPage({
         );
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
+          // console.log(data);
           setRemainingSeconds(2520);
           if (section < 5) {
             router.push(`/grand-tests/${id}/section/${Number(section) + 1}`);

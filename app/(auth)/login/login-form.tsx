@@ -1,26 +1,19 @@
 "use client";
 
-import { useTransition } from "react";
+import {useTransition} from "react";
 import Link from "next/link";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { login } from "../actions";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Icons } from "@/components/ui/icons";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { PasswordInput } from "@/components/ui/password-input";
-import { toast } from "sonner";
+import {z} from "zod";
+import {useForm} from "react-hook-form";
+import {login} from "../actions";
+import {useRouter, useSearchParams} from "next/navigation";
+import {useQueryClient} from "@tanstack/react-query";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {Icons} from "@/components/ui/icons";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
+import {PasswordInput} from "@/components/ui/password-input";
+import {toast} from "sonner";
 
 const loginSchema = z.object({
   email: z
@@ -53,14 +46,14 @@ export default function LoginForm() {
       const response = await login(values);
 
       if (response.error) {
-        toast.error("Something went wrong with your creditials!");
+        toast.error("Something went wrong with your credentials!");
         return;
       }
 
-      queryClient.invalidateQueries({ queryKey: ["user"] }); //invalidate the user
+      await queryClient.invalidateQueries({queryKey: ["user"]}); //invalidate the user
       router.push(redirectTo);
       toast.success(
-        `Welcome Back, Dr.  ${response.user?.user_metadata.full_name}! 🩺`
+        `Welcome Back, Dr. ${response.user?.user_metadata.full_name}! 🩺`
       );
     });
   }

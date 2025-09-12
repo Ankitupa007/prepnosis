@@ -1,24 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import {useEffect, useState} from 'react'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Button} from '@/components/ui/button'
+import {Badge} from '@/components/ui/badge'
+import {Separator} from '@/components/ui/separator'
 import SubjectIcons from '@/components/common/SubjectIcons'
-import  BookmarkButton  from '@/components/bookmark-button'
+import BookmarkButton from '@/components/bookmark-button'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
-import UserHeader from '@/components/user-header'
-import { useAuth } from '@/lib/auth-context'
-import { toast } from 'sonner'
-import {
-  Bookmark,
-  BookOpen,
-  ChevronDown,
-  ChevronRight,
-  Calendar,
-  Tag
-} from 'lucide-react'
+import {useAuth} from '@/lib/auth-context'
+import {toast} from 'sonner'
+import {Bookmark, BookOpen, Calendar, ChevronDown, ChevronRight, Tag} from 'lucide-react'
 
 interface BookmarkedQuestion {
   id: string

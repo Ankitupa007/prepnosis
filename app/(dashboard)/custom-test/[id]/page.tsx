@@ -1,36 +1,21 @@
 "use client";
-import { CircleProgress } from "@/components/common/CircleProgress";
+import {CircleProgress} from "@/components/common/CircleProgress";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import SubjectIcons from "@/components/common/SubjectIcons";
 import CopyButton from "@/components/copy-to-clipboard";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Label} from "@/components/ui/label";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {SidebarTrigger} from "@/components/ui/sidebar";
 import UserHeader from "@/components/user-header";
 import BookmarkButton from "@/components/bookmark-button";
-import { useAuth } from "@/lib/auth-context";
-import {
-  Award,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardPlus,
-  FileText,
-  Play,
-  RotateCcw,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
-import { toast } from "sonner";
+import {useAuth} from "@/lib/auth-context";
+import {Award, BookOpen, ChevronLeft, ChevronRight, ClipboardPlus, FileText, Play,} from "lucide-react";
+import {useRouter} from "next/navigation";
+import {use, useEffect, useState} from "react";
+import {toast} from "sonner";
 
 interface Question {
   id: string;

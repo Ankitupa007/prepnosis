@@ -28,7 +28,7 @@ export async function GET() {
       .select('*')
       .eq('id', alreadyShown.question_id)
       .single();
-    console.log("Question is alreadyShown")
+    // console.log("Question is alreadyShown")
     return Response.json({
       ...question,
       selected_option: alreadyShown.selected_option,

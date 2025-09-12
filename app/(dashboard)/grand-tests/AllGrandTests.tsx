@@ -158,11 +158,10 @@ export default function UserGrandTestsPage() {
                                       : "secondary"
                                   }
                                   className={`absolute top-2 left-2 flex items-center gap-1 px-3 py-1 font-medium text-xs rounded-full
-              ${
-                status.status === "completed"
-                  ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                  : "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
-              }`}
+              ${status.status === "completed"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                                      : "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
+                                    }`}
                                 >
                                   {status.status === "completed" ? (
                                     <CheckCircle className="h-3 w-3" />
