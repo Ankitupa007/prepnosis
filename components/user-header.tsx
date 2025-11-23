@@ -1,24 +1,20 @@
+// user-header.tsx
 "use client"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { SidebarTrigger } from "./ui/sidebar"
+import {usePathname} from "next/navigation"
+import {SidebarTrigger} from "./ui/sidebar"
 import UserAuthState from "./user-auth-state"
 import {
-  Breadcrumb,
-  BreadcrumbEllipsis,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+    Breadcrumb,
+    BreadcrumbEllipsis,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Fragment } from "react"
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
+import {Fragment} from "react"
 
 // Configuration for custom breadcrumb labels and excluded paths
 const breadcrumbConfig = {

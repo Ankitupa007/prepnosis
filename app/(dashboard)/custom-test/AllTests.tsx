@@ -1,24 +1,24 @@
 "use client";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ShareCodeInput from "@/components/share-code-input";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import {Input} from "@/components/ui/input";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {useCustomTests} from "@/hooks/tests/useTests";
-import {CustomTest, TestAttempt} from "@/lib/types/test";
-import {useQueryClient} from "@tanstack/react-query";
-import {BookOpen, ClipboardPlus, Plus, Search} from "lucide-react";
-import {useRouter} from "next/navigation";
-import {useEffect, useMemo, useState} from "react";
-import {toast} from "sonner";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
+import { useCustomTests } from "@/hooks/tests/useTests";
+import { CustomTest, TestAttempt } from "@/lib/types/test";
+import { useQueryClient } from "@tanstack/react-query";
+import { BookOpen, ClipboardPlus, Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import TestCard from "./TestCard";
 
 export default function AllTests() {
@@ -89,33 +89,35 @@ export default function AllTests() {
     );
   }, [tests, searchTerm, filterBy]);
 
-  const handleDeleteTest = async (testId: string) => {
-    if (!confirm("Are you sure you want to delete this test?")) {
-      return;
-    }
+  const [testToDelete, setTestToDelete] = useState<string | null>(null);
+
+  const confirmDelete = async () => {
+    if (!testToDelete) return;
 
     try {
-      setDeletingTestId(testId);
-      await deleteCustomTest(testId);
-
-      // Invalidate and refetch the custom tests query
-      await queryClient.invalidateQueries({ queryKey: ["customTests"] });
-
-      // Or refetch manually if the hook provides this method
-      await refetchCustomTests();
-
+      setDeletingTestId(testToDelete);
+      await deleteCustomTest(testToDelete);
       toast.success("Test deleted successfully");
     } catch (error) {
       console.error("Error deleting test:", error);
       toast.error("Failed to delete test");
     } finally {
       setDeletingTestId(null);
+      setTestToDelete(null);
     }
   };
 
-  const getBestScore = (attempts: TestAttempt[]) => {
-    if (attempts.length === 0) return null;
-    return Math.max(...attempts.map((attempt) => attempt.score));
+  const handleDeleteClick = (testId: string) => {
+    setTestToDelete(testId);
+  };
+
+  const getLatestScore = (attempts: TestAttempt[]) => {
+    if (!attempts || attempts.length === 0) return null;
+    // Sort by completed_at descending to get the latest attempt
+    const sortedAttempts = [...attempts].sort((a, b) =>
+      new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
+    );
+    return sortedAttempts[0].score;
   };
 
   // Show loading spinner while data is being fetched OR hasn't initially loaded
@@ -331,13 +333,33 @@ export default function AllTests() {
                 test={test}
                 onStart={() => router.push(`/custom-test/${test.id}`)}
                 onView={() => router.push(`/custom-test/${test.id}`)}
-                onDelete={() => handleDeleteTest(test.id)}
-                bestScore={getBestScore(test.attempts)}
+                onDelete={() => handleDeleteClick(test.id)}
+                latestScore={getLatestScore(test.attempts)}
                 isDeleting={deletingTestId === test.id}
               />
             ))}
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={!!testToDelete} onOpenChange={(open) => !open && setTestToDelete(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Test</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this test? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-3 mt-4">
+              <Button variant="outline" onClick={() => setTestToDelete(null)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </section>
     </div>
   );

@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 
 export default function TestTimer({
   section,
-  onTimeout,
+  action,
 }: {
   section: number;
-  onTimeout: () => void;
+  action: () => void;
 }) {
   const [timeLeft, setTimeLeft] = useState(42 * 60); // 42 minutes
   const storageKey = `section-${section}-startTime`;
@@ -23,7 +23,7 @@ export default function TestTimer({
       setTimeLeft(remaining);
       if (remaining === 0) {
         clearInterval(interval);
-        onTimeout();
+        action();
       }
     }, 1000);
     return () => clearInterval(interval);

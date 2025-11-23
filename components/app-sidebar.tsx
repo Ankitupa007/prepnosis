@@ -1,6 +1,6 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -23,9 +23,14 @@ import {
   LogOut,
   Hexagon,
   Bookmark,
+  User,
 } from "lucide-react"
 import Logo from "./common/logo"
 import { ToggleTheme } from "./toggle-theme"
+import Link from "next/link";
+import { logOut } from "@/app/(auth)/actions"
+import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
 
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -38,6 +43,23 @@ const navigationItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  const handleSignOut = async () => {
+    try {
+      const response = await logOut()
+      if (response?.error) {
+        toast.error("Failed to sign out")
+        return
+      }
+      queryClient.invalidateQueries({ queryKey: ["user"] })
+      toast.success("Signed out successfully")
+      router.push("/login")
+    } catch (error) {
+      toast.error("Something went wrong")
+    }
+  }
 
   return (
     <Sidebar className="">
@@ -66,7 +88,7 @@ export function AppSidebar() {
                         : ""
                         }`}
                     >
-                      <a
+                      <Link
                         href={item.url}
                         className="flex items-center gap-3 w-full py-4 relative"
                       >
@@ -78,7 +100,7 @@ export function AppSidebar() {
                         {isActive && (
                           <div className="absolute right-3 w-1.5 h-1.5 bg-primary rounded-full" />
                         )}
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
@@ -95,23 +117,33 @@ export function AppSidebar() {
               asChild
               className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200 rounded-lg"
             >
-              <a href="/settings" className="flex items-center gap-3">
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
-              </a>
+              <Link href="/profile" className="flex items-center gap-3">
+                <User className="h-4 w-4" />
+                <span>Profile</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="hover:bg-destructive/10 hover:text-destructive transition-colors duration-200 rounded-lg"
+              className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200 rounded-lg"
             >
-              <a href="/logout" className="flex items-center gap-3">
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </a>
+              <Link href="/settings" className="flex items-center gap-3">
+                <Settings className="h-4 w-4" />
+                <span>Settings</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleSignOut}
+              className="hover:bg-destructive/10 hover:text-destructive transition-colors duration-200 rounded-lg cursor-pointer w-full flex items-center gap-3"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
         </SidebarMenu>
 
         <div className="mt-4 pt-4 border-t border-border">

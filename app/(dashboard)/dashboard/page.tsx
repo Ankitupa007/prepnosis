@@ -138,7 +138,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Welcome, Section */}
-        <section className="w-full">
+        <section className="w-full py-8 md:py-8 lg:py-8">
           <DailyQuestionCard />
         </section>
       </main>

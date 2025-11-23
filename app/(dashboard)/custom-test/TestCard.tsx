@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-function TestCard({ test, onStart, onView, onDelete, bestScore }: TestCardProps) {
+function TestCard({ test, onStart, onView, onDelete, latestScore }: TestCardProps) {
   const [showDropdown, setShowDropdown] = useState(false)
   const testDate = new Date(test.created_at).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -52,15 +52,16 @@ function TestCard({ test, onStart, onView, onDelete, bestScore }: TestCardProps)
                 </Badge>
               )}
               {test._count.attempts > 0 && (
-                <Badge variant="outline">
-                  <span className="font-medium">{test._count.attempts}x</span>
-                  <span className="hidden sm:inline ml-1">attempt(s)</span>
+                <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white shadow-sm">
+                  <Award className="h-3 w-3 mr-1" />
+                  Completed
                 </Badge>
               )}
-              {bestScore !== null && (
+              
+              {latestScore !== null && (
                 <Badge className="bg-gradient-to-r from-[#66C3C1] to-[#5ab5b3] text-white shadow-sm">
                   <Award className="h-3 w-3 mr-1" />
-                  {bestScore}%
+                  Score: {latestScore}%
                 </Badge>
               )}
             </div>
@@ -88,8 +89,17 @@ function TestCard({ test, onStart, onView, onDelete, bestScore }: TestCardProps)
               size="sm"
               className="bg-gradient-to-r from-[#66C3C1] to-[#5ab5b3] hover:from-[#5ab5b3] hover:to-[#4ea8a6] text-white shadow-sm dark:bg-gradient-to-r dark:from-[#66C3C1] dark:to-[#5ab5b3]"
             >
-              <Play className="h-3 w-3 mr-1.5" />
-              {test._count.attempts > 0 ? 'Retake' : 'Start'}
+              {test._count.attempts > 0 ? (
+                <>
+                  <Eye className="h-3 w-3 mr-1.5" />
+                  Review
+                </>
+              ) : (
+                <>
+                  <Play className="h-3 w-3 mr-1.5" />
+                  Start
+                </>
+              )}
             </Button>
 
             <div className="relative">
@@ -159,8 +169,17 @@ function TestCard({ test, onStart, onView, onDelete, bestScore }: TestCardProps)
             }}
             className="flex-1 bg-gradient-to-r from-[#66C3C1] to-[#5ab5b3] hover:from-[#5ab5b3] hover:to-[#4ea8a6] text-white shadow-sm dark:bg-gradient-to-r dark:from-[#66C3C1] dark:to-[#5ab5b3]"
           >
-            <Play className="h-4 w-4 mr-2" />
-            {test._count.attempts > 0 ? 'Retake Test' : 'Start Test'}
+            {test._count.attempts > 0 ? (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                Review Test
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4 mr-2" />
+                Start Test
+              </>
+            )}
           </Button>
 
           <div className="relative">

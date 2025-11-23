@@ -67,7 +67,8 @@ export default function RegisterForm() {
       }
 
       toast.success("Just a step away! check your inbox for activation link.");
-      router.push("/");
+      sessionStorage.setItem("registration-completed", "true");
+      router.push("/check-inbox");
     });
   }
   return (

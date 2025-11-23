@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Bookmark, BookmarkCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/auth-context'
+import { useIsBookmarked, useToggleBookmark } from '@/hooks/use-bookmarks'
 
 interface BookmarkButtonProps {
   questionId: string
@@ -20,92 +20,16 @@ export default function BookmarkButton({
   showText = false,
 }: BookmarkButtonProps) {
   const { user } = useAuth()
-  const [isBookmarked, setIsBookmarked] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const isBookmarked = useIsBookmarked(questionId, user?.id)
+  const toggleMutation = useToggleBookmark(user?.id)
 
-  // Check if question is bookmarked on mount
-  useEffect(() => {
-    if (!user || !questionId) return
-
-    const checkBookmarkStatus = async () => {
-      try {
-        const response = await fetch(`/api/bookmarks/`)
-        if (response.ok) {
-          const data = await response.json()
-          // console.log('API Response:', data) // Debug: Check API response structure
-          const { allBookmarks } = data
-          // console.log('All Bookmarks:', allBookmarks) // Debug: Check bookmarks array
-          // console.log('Current Question ID:', questionId) // Debug: Check current question ID
-
-          if (Array.isArray(allBookmarks)) {
-            const bookmarkExists = allBookmarks.some((bookmark: any) => {
-              // console.log('Comparing:', bookmark.question_id, 'with', questionId) // Debug comparison
-              return bookmark.question_id === questionId
-            })
-            // console.log('Bookmark exists:', bookmarkExists)
-            setIsBookmarked(bookmarkExists)
-          } else {
-            console.error('allBookmarks is not an array:', allBookmarks)
-            setIsBookmarked(false)
-          }
-        } else {
-          console.error('Failed to fetch bookmarks:', response.status, response.statusText)
-        }
-      } catch (error) {
-        console.error('Error checking bookmark status:', error)
-      }
-    }
-
-    checkBookmarkStatus()
-  }, [questionId, user])
-
-  const handleBookmarkToggle = async () => {
+  const handleBookmarkToggle = () => {
     if (!user) {
       toast.error('Please log in to bookmark questions')
       return
     }
 
-    setIsLoading(true)
-
-    try {
-      if (isBookmarked) {
-        // Remove bookmark
-        const response = await fetch(`/api/bookmarks/${questionId}`, {
-          method: 'DELETE'
-        })
-
-        if (response.ok) {
-          setIsBookmarked(false)
-          toast.success('Bookmark removed')
-        } else {
-          throw new Error('Failed to remove bookmark')
-        }
-      } else {
-        // Add bookmark
-        const response = await fetch('/api/bookmarks', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ questionId })
-        })
-
-        if (response.ok) {
-          setIsBookmarked(true)
-          toast.success('Question bookmarked')
-        } else if (response.status === 409) {
-          setIsBookmarked(true)
-          toast.info('Question already bookmarked')
-        } else {
-          throw new Error('Failed to add bookmark')
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling bookmark:', error)
-      toast.error('Failed to update bookmark')
-    } finally {
-      setIsLoading(false)
-    }
+    toggleMutation.mutate({ questionId, isBookmarked })
   }
 
   const getIconSize = () => {
@@ -129,7 +53,7 @@ export default function BookmarkButton({
       variant={variant}
       size={getButtonSize()}
       onClick={handleBookmarkToggle}
-      disabled={isLoading || !user}
+      disabled={!user || toggleMutation.isPending}
       className={`${isBookmarked ? 'text-yellow-500 hover:text-yellow-600' : 'text-gray-500 hover:text-gray-600'} transition-colors`}
     >
       {isBookmarked ? (

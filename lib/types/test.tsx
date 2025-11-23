@@ -199,7 +199,7 @@ export interface TestCardProps {
   onStart: () => void
   onView: () => void
   onDelete: () => void
-  bestScore: number | null
+  latestScore: number | null
   isDeleting: boolean
 }
 

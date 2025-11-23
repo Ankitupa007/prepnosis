@@ -30,7 +30,7 @@ export function DailyQuestionCard() {
                 setIsCorrect(null);
             }
         }
-    }, [data]);
+    }, [data?.id, data?.selected_option, data?.is_correct, data?.question_text]);
 
     const handleOptionSelect = async (value: number) => {
         if (isSubmitted || isSubmitting) return;
@@ -94,7 +94,7 @@ export function DailyQuestionCard() {
     };
 
     return (
-        <main className='container mx-auto py-6 lg:px-8'>
+        <main className='container px-4 md:px-6 mx-auto py-6 lg:px-8 max-w-7xl'>
             <Card className="mx-auto shadow-none border-none grid grid-cols-1 md:grid-cols-2">
                 <CardHeader className="pb-4">
                     <span className='w-32 text-sm font-medium flex justify-center py-1 text-background bg-primary rounded-lg my-2'>#clinical-question</span>
@@ -141,8 +141,8 @@ export function DailyQuestionCard() {
                                                 })}
                                             />
                                             <span className="font-medium text-sm px-2 py-1 rounded">
-                        {label}
-                      </span>
+                                                {label}
+                                            </span>
                                             <span className="flex-1">{opt}</span>
                                             {icon}
                                         </div>
