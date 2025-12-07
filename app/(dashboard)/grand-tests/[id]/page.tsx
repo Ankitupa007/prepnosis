@@ -73,16 +73,19 @@ export default function GrandTestPage({
 
       if (response.ok) {
         const data = await response.json();
+        const currentSection = data.attempt.current_section || 1;
         toast.success("Test started successfully!");
         setAttemptId(data.attempt.id);
         setTestStarted(true);
-        router.push(`/grand-tests/${id}/section/1`);
+        router.push(`/grand-tests/${id}/section/${currentSection}`);
       } else {
         throw new Error("Failed to start test");
       }
     } catch (error) {
       console.error("Error starting test:", error);
       toast.error("Failed to start test");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -197,14 +200,23 @@ export default function GrandTestPage({
               <p></p>
               <div className="p-6 pt-0">
                 {test.user_attempt ? (
-                  <button
-                    onClick={startTest}
-                    className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
-                    disabled={testCompleted}
-                  >
-                    Continue test
-                    <ArrowRight className="w-5 h-5 transition-transform" />
-                  </button>
+                  <>
+                    {!testCompleted && test.user_attempt.current_section && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                          <strong>Current Progress:</strong> Section {test.user_attempt.current_section}
+                        </p>
+                      </div>
+                    )}
+                    <button
+                      onClick={startTest}
+                      className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
+                      disabled={testCompleted}
+                    >
+                      Continue test
+                      <ArrowRight className="w-5 h-5 transition-transform" />
+                    </button>
+                  </>
                 ) : (
                   <button
                     onClick={startTest}
@@ -287,12 +299,12 @@ export default function GrandTestPage({
                   <div className="flex flex-col gap-4">
                     <button
                       onClick={() =>
-                        router.push(`/grand-tests/${id}/section/1`)
+                        router.push(`/grand-tests/${id}/analysis`)
                       }
                       className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 group bg-[#6FCCCA] hover:bg-[#6FCCCA]/70"
                     >
                       <CheckSquare className="w-5 h-5 transition-transform" />
-                      Review Explanations
+                      View Analysis
                     </button>
                     <button
                       onClick={() => router.push(`/grand-tests/${id}/results`)}

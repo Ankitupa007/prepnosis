@@ -64,9 +64,7 @@ export async function GET(request: NextRequest) {
 
       const formattedAttempts = userAttempts.map((attempt) => ({
         id: attempt.id,
-        score: Math.round(
-          (attempt.correct_answers / test.total_questions) * 100
-        ),
+        score: attempt.total_score,
         total_questions: test.total_questions,
         correct_answers: attempt.correct_answers,
         completed_at: attempt.submitted_at,

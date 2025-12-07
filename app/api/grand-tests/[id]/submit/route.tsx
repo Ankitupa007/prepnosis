@@ -1,14 +1,8 @@
-// app/api/grand-tests/[id]/submit.ts
+// app/api/grand-tests/[id]/submit/route.ts
 
 import { createClient } from "@/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-interface Answer {
-  question_id: string;
-  selectedOption: number;
-  isCorrect: boolean;
-  is_marked_for_review: boolean;
-}
+import { calculateMarks } from "@/lib/constants/exam-patterns";
 
 export async function POST(
   request: NextRequest,
@@ -25,7 +19,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const { attemptId, answers, currentSection } = body;
+    const { attemptId } = body;
 
     const { data: attempt, error: attemptError } = await supabase
       .from("user_grand_tests_attempts")
@@ -43,53 +37,35 @@ export async function POST(
 
     const { data: test, error: testError } = await supabase
       .from("grand_tests")
-      .select("negative_marking, test_type, exam_pattern")
+      .select("negative_marking, test_type, exam_pattern, total_questions")
       .eq("id", id)
       .single();
 
     if (testError) throw testError;
 
-    // Calculate results
-    const totalQuestions = answers.length;
-    const answeredQuestions = answers.filter(
-      (a: Answer) => a.selectedOption !== null
-    ).length;
-    const correctAnswers = answers.filter((a: Answer) => a.isCorrect).length;
-    const incorrectAnswers = answeredQuestions - correctAnswers;
-    const totalScore =
-      test.exam_pattern === "NEET_PG"
-        ? correctAnswers * 4 - (test.negative_marking ? incorrectAnswers : 0)
-        : correctAnswers - (test.negative_marking ? incorrectAnswers : 0);
-
-    // Save answers
-    const userAnswerInserts = answers.map((a: Answer) => {
-      let marksAwarded = 0;
-      if (a.selectedOption !== null && a.selectedOption !== undefined) {
-        marksAwarded = a.isCorrect
-          ? test.exam_pattern === "NEET_PG"
-            ? 4
-            : 1
-          : test.negative_marking
-          ? -1
-          : 0;
-      }
-      return {
-        attempt_id: attemptId,
-        question_id: a.question_id,
-        selected_option: a.selectedOption,
-        is_correct: a.isCorrect,
-        marks_awarded: marksAwarded,
-        answered_at: new Date().toISOString(),
-      };
-    });
-
-    const { error: answersError } = await supabase
+    // Get all answers for this attempt
+    const { data: allAnswers, error: answersError } = await supabase
       .from("user_grand_tests_answers")
-      .upsert(userAnswerInserts, {
-        onConflict: "attempt_id,question_id",
-      });
+      .select("selected_option, is_correct, marks_awarded")
+      .eq("attempt_id", attemptId);
 
     if (answersError) throw answersError;
+
+    // Calculate results
+    const totalQuestions = test.total_questions;
+    const answeredQuestions = allAnswers?.filter(
+      (a: any) => a.selected_option !== null
+    ).length || 0;
+    const correctAnswers = allAnswers?.filter((a: any) => a.is_correct).length || 0;
+    const incorrectAnswers = answeredQuestions - correctAnswers;
+    const unanswered = totalQuestions - answeredQuestions;
+
+    // Calculate total score using exam pattern
+    const totalScore = calculateMarks(
+      test.exam_pattern,
+      correctAnswers,
+      incorrectAnswers
+    );
 
     // Time calculations
     const now = new Date();
@@ -107,9 +83,8 @@ export async function POST(
         total_score: totalScore,
         correct_answers: correctAnswers,
         incorrect_answers: incorrectAnswers,
-        unanswered: totalQuestions - answeredQuestions,
+        unanswered: unanswered,
         time_taken_minutes: timeTakenMinutes,
-        current_section: currentSection,
       })
       .eq("id", attemptId)
       .select()
@@ -117,7 +92,7 @@ export async function POST(
 
     if (updateError) throw updateError;
 
-    // Rankings
+    // Calculate rankings
     if (test.test_type === "grand_test") {
       const { data: allAttempts, error: rankingError } = await supabase
         .from("user_grand_tests_attempts")
@@ -129,7 +104,7 @@ export async function POST(
 
       if (!rankingError && allAttempts?.length > 0) {
         const total = allAttempts.length;
-        const rankings = allAttempts.map((a, index) => {
+        const rankings = allAttempts.map((a: any, index: number) => {
           const rank = index + 1;
           const percentile =
             total > 1 ? ((total - rank) / (total - 1)) * 100 : 100;
@@ -161,7 +136,7 @@ export async function POST(
         total_score: totalScore,
         correct_answers: correctAnswers,
         incorrect_answers: incorrectAnswers,
-        unanswered: totalQuestions - answeredQuestions,
+        unanswered: unanswered,
         accuracy: answeredQuestions
           ? Math.round((correctAnswers / answeredQuestions) * 100)
           : 0,

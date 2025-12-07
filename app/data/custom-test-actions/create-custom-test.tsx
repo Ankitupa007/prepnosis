@@ -68,67 +68,108 @@ export async function createCustomTest(formData: FormData) {
             throw new Error("Invalid subjects selected");
         }
 
-        // Fetch questions for selected subjects
+        // 1. Fetch User's Answer History (IDs only)
+        const { data: userAttempts } = await supabase
+            .from("user_test_attempts")
+            .select("id")
+            .eq("user_id", user.id);
+
+        const attemptIds = userAttempts?.map((a) => a.id) || [];
+        const answeredQuestionIds = new Set<string>();
+
+        if (attemptIds.length > 0) {
+            // Fetch in chunks if necessary, but for now assuming it fits
+            const { data: userAnswers } = await supabase
+                .from("user_answers")
+                .select("question_id")
+                .in("attempt_id", attemptIds);
+
+            userAnswers?.forEach((a) => answeredQuestionIds.add(a.question_id));
+        }
+
+        console.log(`User has answered ${answeredQuestionIds.size} unique questions.`);
+
+        // 2. Select Questions per Subject
         const questionsPerSubject = Math.floor(data.numberOfQuestions / data.subjects.length);
         const remainingQuestions = data.numberOfQuestions % data.subjects.length;
-        let selectedQuestions: any[] = [];
+        let finalQuestionIds: string[] = [];
 
         for (const [index, subjectId] of data.subjects.entries()) {
             const questionsToTake = questionsPerSubject + (index < remainingQuestions ? 1 : 0);
-            const { data: subjectQuestions, error } = await supabase
+
+            // Fetch ALL active question IDs for this subject
+            const { data: allSubjectQuestions, error } = await supabase
                 .from("questions")
-                .select("id, subject_id")
+                .select("id")
                 .eq("is_active", true)
-                .eq("subject_id", subjectId)
-                .limit(questionsToTake);
+                .eq("subject_id", subjectId);
 
             if (error) {
                 console.error(`Error fetching questions for subject ${subjectId}:`, error);
                 continue;
             }
 
-            console.log(`Fetched ${subjectQuestions?.length || 0} questions for subject ${subjectId}`);
-            if (subjectQuestions) {
-                selectedQuestions.push(...shuffleArray(subjectQuestions));
+            if (!allSubjectQuestions || allSubjectQuestions.length === 0) {
+                console.warn(`No questions found for subject ${subjectId}`);
+                continue;
             }
+
+            // Split into Unseen and Seen
+            const unseenQuestions = allSubjectQuestions.filter(q => !answeredQuestionIds.has(q.id));
+            const seenQuestions = allSubjectQuestions.filter(q => answeredQuestionIds.has(q.id));
+
+            // Shuffle both
+            const shuffledUnseen = shuffleArray(unseenQuestions);
+            const shuffledSeen = shuffleArray(seenQuestions);
+
+            // Select
+            let selectedForSubject = shuffledUnseen.slice(0, questionsToTake);
+
+            // Fill from seen if needed
+            if (selectedForSubject.length < questionsToTake) {
+                const needed = questionsToTake - selectedForSubject.length;
+                selectedForSubject = [...selectedForSubject, ...shuffledSeen.slice(0, needed)];
+            }
+
+            finalQuestionIds.push(...selectedForSubject.map(q => q.id));
         }
 
-        if (selectedQuestions.length < data.numberOfQuestions) {
-            const usedQuestionIds = new Set(selectedQuestions.map((q) => q.id));
-            const { data: extraQuestions, error } = await supabase
-                .from("questions")
-                .select("id, subject_id")
-                .eq("is_active", true)
-                .in("subject_id", data.subjects)
-                .not("id", "in", `(${Array.from(usedQuestionIds).join(",")})`)
-                .limit(data.numberOfQuestions - selectedQuestions.length);
-
-            if (error) {
-                console.error("Error fetching extra questions:", error);
-            } else if (extraQuestions) {
-                console.log(`Fetched ${extraQuestions.length} extra questions`);
-                selectedQuestions.push(...shuffleArray(extraQuestions));
-            }
-        }
-
-        if (selectedQuestions.length === 0) {
+        // 3. Fetch Full Question Details
+        if (finalQuestionIds.length === 0) {
             throw new Error("No questions available for selected subjects");
         }
 
-        console.log(`Total selected questions: ${selectedQuestions.length}`);
+        const { data: finalQuestions, error: detailsError } = await supabase
+            .from("questions")
+            .select("id, subject_id")
+            .in("id", finalQuestionIds);
+
+        if (detailsError) {
+            console.error("Error fetching question details:", detailsError);
+            throw new Error("Failed to fetch selected questions");
+        }
+
+        if (!finalQuestions || finalQuestions.length === 0) {
+            throw new Error("No questions found after selection");
+        }
+
+        // Shuffle the final list
+        const shuffledFinalQuestions = shuffleArray(finalQuestions);
+
+        console.log(`Total selected questions: ${shuffledFinalQuestions.length}`);
 
         // Create test record
         const shareCode = data.enableSharing ? generateShareCode() : null;
         const { data: test, error: testError } = await supabase
             .from("tests")
             .insert({
-                title: `Custom Test - ${selectedQuestions.length} Questions`,
-                description: `Custom practice test with ${selectedQuestions.length} questions in ${data.testMode} mode`,
+                title: `Custom Test - ${shuffledFinalQuestions.length} Questions`,
+                description: `Custom practice test with ${shuffledFinalQuestions.length} questions in ${data.testMode} mode`,
                 test_type: "custom",
                 test_mode: data.testMode,
                 exam_pattern: "NEET_PG",
-                total_questions: selectedQuestions.length,
-                total_marks: selectedQuestions.length * 4,
+                total_questions: shuffledFinalQuestions.length,
+                total_marks: shuffledFinalQuestions.length * 4,
                 duration_minutes: 0,
                 negative_marking: 0,
                 is_active: true,
@@ -145,7 +186,7 @@ export async function createCustomTest(formData: FormData) {
         }
 
         // Insert test-question mappings
-        const testQuestions = selectedQuestions.map((question, index) => ({
+        const testQuestions = shuffledFinalQuestions.map((question, index) => ({
             test_id: test.id,
             question_id: question.id,
             section_number: 1,

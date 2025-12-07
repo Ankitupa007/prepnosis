@@ -69,22 +69,28 @@ export async function GET(
       console.error("Attempt fetch error:", attemptError);
     }
 
+    // Use current_section from database as source of truth
     let currentSection = attempt?.current_section || 1;
     let remainingSeconds = 2520;
-    if (Array.isArray(attempt?.section_times)) {
-      const activeSection = attempt.section_times.find(
-        (s: any) => s.remaining_seconds > 0 && s.start_time && !s.is_submitted
+
+    if (Array.isArray(attempt?.section_times) && currentSection) {
+      // Find the section times for the current section
+      const currentSectionTime = attempt.section_times.find(
+        (s: any) => Number(s.section) === Number(currentSection)
       );
-      currentSection = activeSection?.section || 1;
-      if (activeSection?.start_time) {
-        const startTime = new Date(activeSection.start_time);
+
+      if (currentSectionTime?.start_time && !currentSectionTime.is_submitted) {
+        const startTime = new Date(currentSectionTime.start_time);
         const elapsedSeconds = Math.floor(
           (new Date().getTime() - startTime.getTime()) / 1000
         );
         remainingSeconds = Math.max(
           0,
-          activeSection.remaining_seconds - elapsedSeconds
+          currentSectionTime.remaining_seconds - elapsedSeconds
         );
+      } else if (currentSectionTime) {
+        // Section not started yet, use full duration
+        remainingSeconds = currentSectionTime.remaining_seconds;
       }
     }
 
@@ -109,7 +115,9 @@ export async function GET(
         marks,
         section_number,
         user_grand_tests_answers (
-          selected_option
+          selected_option,
+          is_marked_for_review,
+          question_state
         )
       `
       )
@@ -138,7 +146,7 @@ export async function GET(
 
     // Transform questions
     const transformedQuestions =
-      testQuestions?.map((question) => ({
+      testQuestions?.map((question: any) => ({
         id: question.id,
         question_id: question.id,
         question_order: question.question_order,
@@ -160,11 +168,15 @@ export async function GET(
         },
         user_answer:
           question.user_grand_tests_answers &&
-          question.user_grand_tests_answers.length > 0
+            question.user_grand_tests_answers.length > 0
             ? {
-                selected_option:
-                  question.user_grand_tests_answers[0].selected_option,
-              }
+              selected_option:
+                question.user_grand_tests_answers[0].selected_option,
+              is_marked_for_review:
+                question.user_grand_tests_answers[0].is_marked_for_review || false,
+              question_state:
+                question.user_grand_tests_answers[0].question_state || 'not_visited',
+            }
             : null,
       })) || [];
 

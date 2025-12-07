@@ -1,60 +1,6 @@
 import { createClient } from "@/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-// Define interfaces for TypeScript
-interface Question {
-  id: string;
-  question_text: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  difficulty_level: string;
-  subject_id: string;
-  topic_id: string;
-}
-
-interface TestQuestion {
-  id: string;
-  question_order: number;
-  marks: number;
-  section_number: number;
-  question_text: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  images: string[];
-  difficulty_level: string;
-  subject_id: string;
-  topic_id: string;
-}
-
-interface Test {
-  id: string;
-  title: string;
-  duration_minutes: number;
-  test_type: string;
-  test_mode: string;
-  scheduled_at: string | null;
-  expires_at: string | null;
-  total_questions: number;
-  total_marks: number;
-  negative_marking: number;
-}
-
-interface UserAttempt {
-  id: string;
-  started_at: string;
-  is_completed: boolean;
-  section_times: any;
-}
-
-interface UserAnswer {
-  question_id: string;
-  selected_option: number;
-  is_marked_for_review: boolean;
-}
+import { getExamPatternConfig, getSectionConfig } from "@/lib/constants/exam-patterns";
 
 export async function POST(
   request: NextRequest,
@@ -76,7 +22,7 @@ export async function POST(
     const { data: test, error: testError } = await supabase
       .from("grand_tests")
       .select(
-        `id, title, duration_minutes, test_type, test_mode, scheduled_at, expires_at, 
+        `id, title, duration_minutes, test_type, test_mode, exam_pattern, scheduled_at, expires_at, 
          total_questions, total_marks, negative_marking`
       )
       .eq("id", id)
@@ -101,28 +47,26 @@ export async function POST(
       return NextResponse.json({ error: "Test has expired" }, { status: 410 });
     }
 
-    // Check if user has already completed this test (for grand_test type)
-    if (test.test_type === "grand_test") {
-      const { data: existingAttempt } = await supabase
-        .from("user_grand_tests_attempts")
-        .select("id")
-        .eq("test_id", id)
-        .eq("user_id", user.id)
-        .eq("is_completed", true)
-        .maybeSingle();
+    // Check if user has already completed this test
+    const { data: existingAttempt } = await supabase
+      .from("user_grand_tests_attempts")
+      .select("id")
+      .eq("test_id", id)
+      .eq("user_id", user.id)
+      .eq("is_completed", true)
+      .maybeSingle();
 
-      if (existingAttempt) {
-        return NextResponse.json(
-          { error: "You have already completed this test" },
-          { status: 400 }
-        );
-      }
+    if (existingAttempt) {
+      return NextResponse.json(
+        { error: "You have already completed this test" },
+        { status: 400 }
+      );
     }
 
     // Check for ongoing attempt
     const { data: ongoingAttempt, error: ongoingError } = await supabase
       .from("user_grand_tests_attempts")
-      .select("id, started_at, is_completed, section_times")
+      .select("id, started_at, is_completed, section_times, current_section")
       .eq("test_id", id)
       .eq("user_id", user.id)
       .eq("is_completed", false)
@@ -136,40 +80,21 @@ export async function POST(
       );
     }
 
-    let attempt: UserAttempt;
+    let attempt: any;
     let currentSection = 1;
 
+    // Get exam pattern configuration
+    const examConfig = getExamPatternConfig(test.exam_pattern);
+
     if (ongoingAttempt) {
-      // Check if ongoing attempt has exceeded time limit for current section
-      const sectionTimes = ongoingAttempt.section_times || [];
-      const currentSectionData = sectionTimes.find(
-        (s: any) => s.section === currentSection
-      );
-      if (currentSectionData && currentSectionData.remaining_seconds <= 0) {
-        // Move to next section or complete test
-        currentSection = Math.min(currentSection + 1, 5);
-        if (currentSection > 5) {
-          await supabase
-            .from("user_grand_tests_attempts")
-            .update({
-              is_completed: true,
-              submitted_at: new Date().toISOString(),
-              auto_submitted: true,
-            })
-            .eq("id", ongoingAttempt.id);
-          return NextResponse.json(
-            { error: "Test time has expired" },
-            { status: 408 }
-          );
-        }
-      }
       attempt = ongoingAttempt;
+      currentSection = attempt.current_section || 1;
     } else {
-      // Initialize section_times for new attempt
-      const sectionTimes = Array.from({ length: 5 }, (_, i) => ({
-        section: i + 1,
-        start_time: i === 0 ? new Date().toISOString() : null,
-        remaining_seconds: 2520, // 42 minutes
+      // Initialize section_times based on exam pattern
+      const sectionTimes = examConfig.sections.map((section) => ({
+        section: section.sectionNumber,
+        start_time: section.sectionNumber === 1 ? new Date().toISOString() : null,
+        remaining_seconds: section.durationSeconds,
         is_submitted: false,
       }));
 
@@ -181,8 +106,9 @@ export async function POST(
           test_id: id,
           started_at: new Date().toISOString(),
           section_times: sectionTimes,
+          current_section: 1,
         })
-        .select("id, started_at, is_completed, section_times")
+        .select("id, started_at, is_completed, section_times, current_section")
         .single();
 
       if (newAttemptError) {
@@ -197,16 +123,17 @@ export async function POST(
 
     // Get current section from section_times
     const sectionTimes = attempt.section_times || [];
-    currentSection =
-      sectionTimes.find((s: any) => s.remaining_seconds > 0 && s.start_time)
-        ?.section || 1;
+    const activeSection = sectionTimes.find(
+      (s: any) => !s.is_submitted && s.section >= currentSection
+    );
+    currentSection = activeSection?.section || 1;
 
-    // Get test questions for current section
+    // Get test questions for current section only
     const { data: questions, error: questionsError } = await supabase
       .from("grand_tests_questions")
       .select(
         `id, question_text, option_a, option_b, option_c, option_d, images,
-         difficulty_level, subject_id, topic_id, question_order, marks, section_number`
+         difficulty_level, subject_id, topic_id, question_order, marks, section_number, correct_option`
       )
       .eq("test_id", id)
       .eq("is_active", true)
@@ -222,50 +149,42 @@ export async function POST(
     }
 
     // Get existing answers for current section
-    const { data: existingAnswers, error: answersError } = await supabase
+    const { data: existingAnswers } = await supabase
       .from("user_grand_tests_answers")
-      .select("question_id, selected_option, is_marked_for_review")
-      .eq("attempt_id", attempt.id);
-
-    if (answersError) {
-      console.error("Answers fetch error:", answersError);
-      return NextResponse.json(
-        { error: "Failed to fetch answers" },
-        { status: 500 }
-      );
-    }
+      .select("question_id, selected_option, is_marked_for_review, question_state")
+      .eq("attempt_id", attempt.id)
+      .eq("section_number", currentSection);
 
     // Create answers map
     const answersMap =
-      existingAnswers?.reduce((acc, answer: UserAnswer) => {
+      existingAnswers?.reduce((acc: any, answer: any) => {
         acc[answer.question_id] = {
           selected_option: answer.selected_option,
           is_marked_for_review: answer.is_marked_for_review,
+          question_state: answer.question_state,
         };
         return acc;
-      }, {} as Record<string, { selected_option: number; is_marked_for_review: boolean }>) ||
-      {};
+      }, {}) || {};
 
     // Calculate remaining time for current section
     const currentSectionData = sectionTimes.find(
       (s: any) => s.section === currentSection
     );
-    let is_submitted: boolean = false;
-    let remainingSeconds = currentSectionData?.remaining_seconds || 2520;
+
+    const sectionConfig = getSectionConfig(test.exam_pattern, currentSection);
+    let remainingSeconds = sectionConfig?.durationSeconds || 2520;
+
     if (currentSectionData?.start_time) {
       const startTime = new Date(currentSectionData.start_time);
       const elapsedSeconds = Math.floor(
         (now.getTime() - startTime.getTime()) / 1000
       );
-      remainingSeconds = Math.max(0, 2520 - elapsedSeconds);
-      if (remainingSeconds < 1) {
-        is_submitted = true;
-      }
+      remainingSeconds = Math.max(0, (sectionConfig?.durationSeconds || 2520) - elapsedSeconds);
     }
 
     // Transform questions with user answers
     const questionsWithAnswers =
-      questions?.map((question: TestQuestion) => ({
+      questions?.map((question: any) => ({
         id: question.id,
         question_text: question.question_text,
         option_a: question.option_a,
@@ -279,6 +198,7 @@ export async function POST(
         question_order: question.question_order,
         marks: question.marks,
         section_number: question.section_number,
+        correct_option: question.correct_option,
         user_answer: answersMap[question.id] || null,
       })) || [];
 
@@ -289,6 +209,7 @@ export async function POST(
         test_title: test.title,
         test_type: test.test_type,
         test_mode: test.test_mode,
+        exam_pattern: test.exam_pattern,
         started_at: attempt.started_at,
         duration_minutes: test.duration_minutes,
         remaining_seconds: remainingSeconds,
@@ -298,6 +219,7 @@ export async function POST(
         negative_marking: test.negative_marking,
         questions: questionsWithAnswers,
         section_times: sectionTimes,
+        exam_config: examConfig,
       },
     });
   } catch (error) {

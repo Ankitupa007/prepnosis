@@ -20,15 +20,12 @@ interface Subject {
     id: string;
     name: string;
 }
-
 // Client Component for form handling
 export default function CreateCustomTestClient({ subjects }: { subjects: Subject[] }) {
     const [isLoading, setIsLoading] = useState(false);
     const [numberOfQuestions, setNumberOfQuestions] = useState<number>(25);
     const [testMode, setTestMode] = useState<"regular" | "exam">("regular");
-    const [selectedSubjects, setSelectedSubjects] = useState<string[]>(
-        subjects.map((s) => s.id)
-    );
+    const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
     const [enableSharing, setEnableSharing] = useState(true);
     const queryClient = useQueryClient();
     const { user } = useAuth();
@@ -84,8 +81,8 @@ export default function CreateCustomTestClient({ subjects }: { subjects: Subject
                                                     type="button"
                                                     onClick={() => setNumberOfQuestions(preset.questions)}
                                                     className={`px-4 py-2 rounded-full border-2 transition-all duration-200 text-left w-full ${isSelected
-                                                            ? "bg-[#6FCCCA] border-[#6FCCCA] text-background shadow-sm"
-                                                            : "border-border border-dashed hover:border-border/60"
+                                                        ? "bg-[#6FCCCA] border-[#6FCCCA] text-background shadow-sm"
+                                                        : "border-border border-dashed hover:border-border/60"
                                                         }`}
                                                 >
                                                     <div className="flex items-center justify-center gap-3">
@@ -120,8 +117,8 @@ export default function CreateCustomTestClient({ subjects }: { subjects: Subject
                                     <Label htmlFor="regular" className="font-medium cursor-pointer">
                                         <div
                                             className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${testMode === "regular"
-                                                    ? "border-[#6FCCCA] bg-[#6FCCCA]/5"
-                                                    : "border-border hover:border-border/50"
+                                                ? "border-[#6FCCCA] bg-[#6FCCCA]/5"
+                                                : "border-border hover:border-border/50"
                                                 }`}
                                         >
                                             <div className="flex items-center space-x-3">
@@ -142,8 +139,8 @@ export default function CreateCustomTestClient({ subjects }: { subjects: Subject
                                     <Label htmlFor="exam" className="font-medium cursor-pointer">
                                         <div
                                             className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${testMode === "exam"
-                                                    ? "border-[#6FCCCA] bg-[#6FCCCA]/5"
-                                                    : "border-border hover:border-border/50"
+                                                ? "border-[#6FCCCA] bg-[#6FCCCA]/5"
+                                                : "border-border hover:border-border/50"
                                                 }`}
                                         >
                                             <div className="flex items-center space-x-3">
@@ -206,8 +203,8 @@ export default function CreateCustomTestClient({ subjects }: { subjects: Subject
                                                     }
                                                 }}
                                                 className={`px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1 transition-all duration-200 ${isSelected
-                                                        ? "bg-[#6FCCCA] border-[#6FCCCA] border text-background shadow-sm"
-                                                        : "bg-none text-foreground/50 border-2 border-dashed border-border hover:border-border/60"
+                                                    ? "bg-[#6FCCCA] border-[#6FCCCA] border text-background shadow-sm"
+                                                    : "bg-none text-foreground/50 border-2 border-dashed border-border hover:border-border/60"
                                                     }`}
                                             >
                                                 <SubjectIcons subjectName={subject.name} styles="w-4 h-4" />

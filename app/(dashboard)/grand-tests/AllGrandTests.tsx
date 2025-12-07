@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BookOpen,
   Clock,
@@ -11,22 +10,31 @@ import {
   BarChart3,
   AlertTriangle,
   Target,
-  ListTodo,
-  RotateCcw,
-  Timer,
   CheckCircle,
-  TrendingUp,
+  Timer,
   Info,
+  Filter,
+  Search,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/lib/auth-context";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Test {
   id: string;
@@ -56,6 +64,9 @@ export default function UserGrandTestsPage() {
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "completed" | "available">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [patternFilter, setPatternFilter] = useState<"all" | "NEET_PG" | "INICET">("all");
 
   useEffect(() => {
     if (user) {
@@ -85,6 +96,19 @@ export default function UserGrandTestsPage() {
     return { status: "available", message: "Available", color: "blue" };
   };
 
+  const filteredTests = tests.filter((test) => {
+    const status = getTestStatus(test).status;
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "completed" && status === "completed") ||
+      (filter === "available" && status === "available");
+
+    const matchesSearch = test.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesPattern = patternFilter === "all" || test.exam_pattern === patternFilter;
+
+    return matchesFilter && matchesSearch && matchesPattern;
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -105,274 +129,238 @@ export default function UserGrandTestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-7xl mx-auto"
+        className="max-w-7xl mx-auto space-y-8"
       >
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-3xl font-bold text-foreground tracking-tight">
-            Your Grand Tests
-          </h1>
-          <p className="mt-2 text-foreground/60">
-            Explore all available grand tests and track your performance.
-          </p>
-          <Tabs defaultValue="grand-tests" className="w-full max-w-4xl py-6">
-            <TabsList>
-              <TabsTrigger value="grand-tests">Grand Tests</TabsTrigger>
-              <TabsTrigger value="neetpg">NEET PG</TabsTrigger>
-            </TabsList>
-            <TabsContent value="grand-tests" className="max-w-7xl py-6">
-              {loading ? (
-                <div className="flex items-center justify-center min-h-screen">
-                  <LoadingSpinner />
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">
+              Grand Tests
+            </h1>
+            <p className="mt-1 text-foreground/60">
+              Practice with full-length exams to assess your preparation.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="bg-card border rounded-lg p-1 flex items-center">
+              <Tabs value={filter} onValueChange={(v) => setFilter(v as any)} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 h-9">
+                  <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
+                  <TabsTrigger value="available" className="text-xs sm:text-sm">Available</TabsTrigger>
+                  <TabsTrigger value="completed" className="text-xs sm:text-sm">Completed</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center bg-card p-4 rounded-xl border shadow-sm">
+          <div className="relative w-full sm:w-auto sm:flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tests..."
+              className="pl-9 bg-background"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select value={patternFilter} onValueChange={(v) => setPatternFilter(v as any)}>
+            <SelectTrigger className="w-full sm:w-[180px] bg-background">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <SelectValue placeholder="Exam Pattern" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Patterns</SelectItem>
+              <SelectItem value="NEET_PG">NEET PG</SelectItem>
+              <SelectItem value="INICET">INICET</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Tests Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filteredTests.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full flex flex-col items-center justify-center py-12 text-center"
+              >
+                <div className="bg-secondary/50 p-6 rounded-full mb-4">
+                  <BookOpen className="h-10 w-10 text-muted-foreground" />
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  {tests.length === 0 ? (
-                    <Card className="p-6 bg-card text-center">
-                      <p className="text-foreground/70">
-                        No grand tests available.
-                      </p>
-                    </Card>
-                  ) : (
-                    tests.map((test, index) => {
-                      const status = getTestStatus(test);
-                      return (
-                        <motion.div
-                          key={test.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1, duration: 0.3 }}
-                        >
-                          <Card className="p-2 bg-card border-border shadow-none transition-all duration-300 rounded-b-none w-full max-w-7xl border-b-0">
-                            <div className="flex flex-row gap-4">
-                              {/* Image Section */}
-                              <div className="relative w-full md:w-1/6">
-                                <Badge
-                                  variant={
-                                    status.status === "completed"
-                                      ? "default"
-                                      : "secondary"
-                                  }
-                                  className={`absolute top-2 left-2 flex items-center gap-1 px-3 py-1 font-medium text-xs rounded-full
-              ${status.status === "completed"
-                                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                                      : "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
-                                    }`}
-                                >
-                                  {status.status === "completed" ? (
-                                    <CheckCircle className="h-3 w-3" />
-                                  ) : (
-                                    <Clock className="h-3 w-3" />
-                                  )}
-                                  {status.message}
-                                </Badge>
-                                <Image
-                                  src="/images/gt.png"
-                                  alt="Grand Test Image"
-                                  width={400}
-                                  height={400}
-                                  className="rounded-xl w-full object-cover"
-                                  priority
-                                />
-                              </div>
+                <h3 className="text-xl font-semibold">No tests found</h3>
+                <p className="text-muted-foreground mt-2">
+                  Try adjusting your filters or search query.
+                </p>
+                <Button
+                  variant="link"
+                  onClick={() => {
+                    setFilter("all");
+                    setSearchQuery("");
+                    setPatternFilter("all");
+                  }}
+                  className="mt-4"
+                >
+                  Clear all filters
+                </Button>
+              </motion.div>
+            ) : (
+              filteredTests.map((test, index) => {
+                const status = getTestStatus(test);
+                const latestAttempt = test.attempts[0];
+                const isCompleted = status.status === "completed";
 
-                              {/* Content Section */}
-                              <div className="flex-1 space-y-4 w-full p-2">
-                                {/* Header */}
-                                <div className="space-y-2">
-                                  <h2 className="md:text-xl font-bold text-foreground group-hover:text-[#66CCCF] transition-colors duration-300">
-                                    {test.exam_pattern} | {test.title}
-                                  </h2>
-                                  <p className="text-muted-foreground text-sm line-clamp-2">
-                                    {test.description ||
-                                      "No description available"}
-                                  </p>
-                                </div>
-
-                                {/* Test Stats */}
-                                {/* <div className="flex gap-3 flex-wrap py-4 border-t border-border">
-                                  <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary">
-                                    <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                                      <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">
-                                        Questions
-                                      </p>
-                                      <p className="font-semibold text-foreground">
-                                        {test.total_questions}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary">
-                                    <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
-                                      <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                    </div>
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">
-                                        Total Marks
-                                      </p>
-                                      <p className="font-semibold text-foreground">
-                                        {test.total_marks}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary">
-                                    <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                                      <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                    </div>
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">
-                                        Pattern
-                                      </p>
-                                      <p className="font-semibold text-foreground text-xs">
-                                        {test.exam_pattern}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div> */}
-
-                                {/* Performance Section */}
-                                {/* {test.attempts?.length > 0 && (
-                            <div className="p-4 rounded-lg bg-gradient-to-r from-[#66CCCF]/10 to-[#66CCCF]/5 border border-[#66CCCF]/20">
-                              <div className="flex items-center justify-between mb-3">
-                                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                                  <TrendingUp className="h-4 w-4 text-[#66CCCF]" />
-                                  Your Performance
-                                </h3>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-[#66CCCF]/20 to-[#66CCCF]/10 border border-[#66CCCF]/30">
-                                  <div className="p-2 rounded-full bg-[#66CCCF]/20">
-                                    <Trophy className="h-5 w-5 text-[#66CCCF]" />
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-muted-foreground">
-                                      Score
-                                    </p>
-                                    <p className="text-lg font-bold text-[#66CCCF]">
-                                      {test.attempts[0].score}%
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950/20">
-                                  <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
-                                    <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-muted-foreground">
-                                      Correct
-                                    </p>
-                                    <p className="font-semibold text-foreground">
-                                      {test.attempts[0].correct_answers}/
-                                      {test.total_questions}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20">
-                                  <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                                    <Timer className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-muted-foreground">
-                                      Time
-                                    </p>
-                                    <p className="font-semibold text-foreground">
-                                      {test.attempts[0].time_taken}m
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )} */}
-
-                                {/* Action Buttons */}
-                                {/* Buttons */}
-                                <div className="flex flex-col gap-3">
-                                  {status.status === "available" && (
-                                    <div className="flex flex-col md:flex-row gap-3">
-                                      <Button
-                                        size="lg"
-                                        onClick={() =>
-                                          router.push(`/grand-tests/${test.id}`)
-                                        }
-                                        className="w-full bg-[#66CCCF] hover:bg-[#66CCCF]/90 text-white font-semibold"
-                                      >
-                                        <PlayCircle className="h-5 w-5 mr-2" />
-                                        Attempt Test
-                                      </Button>
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        onClick={() =>
-                                          router.push(
-                                            `/grand-tests/${test.id}/`
-                                          )
-                                        }
-                                        className="w-full border-[#66CCCF]/30 text-[#66CCCF] hover:bg-[#66CCCF]/10 hover:border-[#66CCCF]/50 transition-all duration-300"
-                                      >
-                                        <Info className="h-5 w-5" />
-                                        Test Details
-                                      </Button>
-                                    </div>
-                                  )}
-                                  {status.status === "completed" && (
-                                    <div className="flex flex-col md:flex-row gap-3">
-                                      <Button
-                                        size="lg"
-                                        onClick={() =>
-                                          router.push(
-                                            `/grand-tests/${test.id}/section/1`
-                                          )
-                                        }
-                                        className="w-full bg-[#66CCCF] hover:bg-[#66CCCF]/90 text-white font-semibold transition-all duration-300"
-                                      >
-                                        <BarChart3 className="h-5 w-5" />
-                                        Analyze Test
-                                      </Button>
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        onClick={() =>
-                                          router.push(
-                                            `/grand-tests/${test.id}/results`
-                                          )
-                                        }
-                                        className="w-full border-[#66CCCF]/30 text-[#66CCCF] hover:bg-[#66CCCF]/10 hover:border-[#66CCCF]/50 transition-all duration-300"
-                                      >
-                                        <Trophy className="h-5 w-5" />
-                                        Results
-                                      </Button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                          <div className="border bg-card rounded-b-xl -top-5 px-4 py-1.5 border-border flex justify-between items-center">
-                            <p className="text-xs text-foreground/60">
-                              200 Questions | 800 Marks{" "}
-                            </p>
-                            <p className="text-xs text-foreground/60">
-                              {format(
-                                new Date(test.created_at),
-                                "dd MMM, yyyy"
+                return (
+                  <motion.div
+                    key={test.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Card className="overflow-hidden border-border hover:border-[#66CCCF]/50 transition-all duration-300 hover:shadow-md group h-full flex flex-col">
+                      <div className="flex flex-col sm:flex-row h-full">
+                        {/* Left Side: Image & Basic Info */}
+                        <div className="sm:w-1/3 bg-secondary/30 relative flex flex-col">
+                          <div className="relative aspect-video sm:aspect-square w-full overflow-hidden">
+                            <Image
+                              src="/images/gt.png"
+                              alt="Grand Test"
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent sm:hidden" />
+                            <Badge
+                              className={`absolute top-3 left-3 z-10 backdrop-blur-md border-0 ${isCompleted
+                                  ? "bg-green-500/90 text-white"
+                                  : "bg-blue-500/90 text-white"
+                                }`}
+                            >
+                              {isCompleted ? (
+                                <span className="flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Completed</span>
+                              ) : (
+                                <span className="flex items-center gap-1"><PlayCircle className="h-3 w-3" /> Available</span>
                               )}
-                            </p>
+                            </Badge>
                           </div>
-                        </motion.div>
-                      );
-                    })
-                  )}
-                </div>
-              )}
-            </TabsContent>
-            <TabsContent value="neetpg">Change your password here.</TabsContent>
-          </Tabs>
+                          <div className="p-4 flex-1 flex flex-col justify-between sm:hidden">
+                            {/* Mobile specific content if needed */}
+                          </div>
+                        </div>
+
+                        {/* Right Side: Content */}
+                        <div className="flex-1 flex flex-col p-5">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <Badge variant="outline" className="mb-2 text-xs font-normal text-muted-foreground border-muted-foreground/30">
+                                {test.exam_pattern}
+                              </Badge>
+                              <h3 className="text-lg font-bold line-clamp-1 group-hover:text-[#66CCCF] transition-colors">
+                                {test.title}
+                              </h3>
+                            </div>
+                          </div>
+
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+                            {test.description || "Comprehensive grand test to evaluate your readiness."}
+                          </p>
+
+                          {/* Stats Grid */}
+                          <div className="grid grid-cols-3 gap-2 mb-4">
+                            <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                              <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                                <BookOpen className="h-3 w-3" />
+                                <span className="text-[10px] uppercase font-bold">Ques</span>
+                              </div>
+                              <span className="text-sm font-semibold">{test.total_questions}</span>
+                            </div>
+                            <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                              <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                                <Target className="h-3 w-3" />
+                                <span className="text-[10px] uppercase font-bold">Marks</span>
+                              </div>
+                              <span className="text-sm font-semibold">{test.total_marks}</span>
+                            </div>
+                            <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                              <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                                <Clock className="h-3 w-3" />
+                                <span className="text-[10px] uppercase font-bold">Time</span>
+                              </div>
+                              <span className="text-sm font-semibold">200m</span>
+                            </div>
+                          </div>
+
+                          {/* Completed Stats Overlay */}
+                          {isCompleted && latestAttempt && (
+                            <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg border border-green-100 dark:border-green-900/30 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Trophy className="h-4 w-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-700 dark:text-green-400">Your Score</span>
+                              </div>
+                              <span className="text-lg font-bold text-green-700 dark:text-green-400">
+                                {latestAttempt.score} <span className="text-xs font-normal opacity-70">/ {test.total_marks}</span>
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="flex gap-2 mt-auto">
+                            {isCompleted ? (
+                              <>
+                                <Button
+                                  className="flex-1 bg-[#66CCCF] hover:bg-[#66CCCF]/90 text-white"
+                                  onClick={() => router.push(`/grand-tests/${test.id}/analysis`)}
+                                >
+                                  <BarChart3 className="h-4 w-4 mr-2" />
+                                  Analysis
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 border-[#66CCCF]/30 text-[#66CCCF] hover:bg-[#66CCCF]/10"
+                                  onClick={() => router.push(`/grand-tests/${test.id}/results`)}
+                                >
+                                  <Trophy className="h-4 w-4 mr-2" />
+                                  Rank
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  className="flex-1 bg-[#66CCCF] hover:bg-[#66CCCF]/90 text-white"
+                                  onClick={() => router.push(`/grand-tests/${test.id}`)}
+                                >
+                                  <PlayCircle className="h-4 w-4 mr-2" />
+                                  Start Test
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  className="px-3"
+                                  onClick={() => router.push(`/grand-tests/${test.id}`)}
+                                >
+                                  <Info className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </div>

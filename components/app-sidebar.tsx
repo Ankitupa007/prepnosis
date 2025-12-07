@@ -12,6 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import {
   Home,
@@ -45,6 +46,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { isMobile, setOpenMobile } = useSidebar()
 
   const handleSignOut = async () => {
     try {
@@ -83,6 +85,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
+                      onClick={() => isMobile && setOpenMobile(false)}
                       className={`hover:bg-accent hover:text-accent-foreground transition-all duration-200 rounded-lg group ${isActive
                         ? "bg-accent text-accent-foreground font-medium border border-accent-foreground/10 shadow-sm"
                         : ""

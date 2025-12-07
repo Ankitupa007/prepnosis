@@ -24,21 +24,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // Optional: section restriction logic
-    const match = path.match(/^\/grand-tests\/([^/]+)(?:\/section\/(\d+))?$/);
-    if (match) {
-      const testId = match[1];
-      const requestedSection = match[2] ? parseInt(match[2]) : null;
-
-      const currentSection = user.user_metadata?.current_section || 1;
-      const isCompleted = user.user_metadata?.is_completed || false;
-
-      if (!isCompleted && requestedSection && requestedSection !== currentSection) {
-        return NextResponse.redirect(
-          new URL(`/grand-tests/${testId}/section/${currentSection}`, request.url)
-        );
-      }
-    }
+    // Strict section access control is now handled in the page component
+    // to avoid expensive database calls in middleware
   }
 
   // 3. Public routes (homepage, about, etc.) just pass through

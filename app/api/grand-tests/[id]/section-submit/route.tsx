@@ -1,5 +1,6 @@
 import { createClient } from "@/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { getExamPatternConfig } from "@/lib/constants/exam-patterns";
 
 export async function POST(
   request: NextRequest,
@@ -11,8 +12,7 @@ export async function POST(
   const {
     attemptId,
     sectionNumber,
-    answers,
-  }: { attemptId: string; sectionNumber: number; answers: any } = body;
+  }: { attemptId: string; sectionNumber: number } = body;
 
   try {
     const {
@@ -22,9 +22,10 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get attempt with test info
     const { data: attempt, error: attemptError } = await supabase
       .from("user_grand_tests_attempts")
-      .select("id, section_times, test_id")
+      .select("id, section_times, test_id, user_id")
       .eq("id", attemptId)
       .eq("user_id", user.id)
       .eq("is_completed", false)
@@ -37,87 +38,60 @@ export async function POST(
         { status: 406 }
       );
     }
-    console.log(sectionNumber, attempt.section_times);
 
+    // Get test to determine exam pattern
+    const { data: test, error: testError } = await supabase
+      .from("grand_tests")
+      .select("exam_pattern")
+      .eq("id", attempt.test_id)
+      .single();
 
+    if (testError || !test) {
+      return NextResponse.json(
+        { error: "Test not found" },
+        { status: 404 }
+      );
+    }
+
+    const examConfig = getExamPatternConfig(test.exam_pattern);
     const sectionTimes = attempt.section_times || [];
-    const currentSectionData = sectionTimes.find(
-      (s: any) => s.section === sectionNumber
-    );
-    const now = new Date();
-    const elapsedSeconds = currentSectionData?.start_time
-      ? Math.floor(
-          (now.getTime() - new Date(currentSectionData.start_time).getTime()) /
-            1000
-        )
-      : 0;
 
-    const remainingSeconds = Math.max(0, 2520 - elapsedSeconds);
-
-    let updatedSectionTimes = sectionTimes.map((s: any) => {
+    // Mark current section as submitted
+    const updatedSectionTimes = sectionTimes.map((s: any) => {
       if (Number(s.section) === Number(sectionNumber)) {
         return {
           ...s,
           is_submitted: true,
           remaining_seconds: 0,
-          start_time: null, // Section done, cleanup
+          start_time: null,
         };
       }
       return s;
     });
 
-    console.log(updatedSectionTimes);
-    
-    if (!updatedSectionTimes) {
-      return NextResponse.json(
-        { error: "Section already submitted or invalid" },
-        { status: 400 }
-      );
-    }
-
-    const userAnswerInserts = answers.map((answer: any) => ({
-      attempt_id: attemptId,
-      question_id: answer.questionId,
-      selected_option: answer.selectedOption,
-      is_correct: answer.isCorrect,
-      marks_awarded: answer.isCorrect
-        ? 4
-        : answer.selectedOption !== null
-        ? -1
-        : 0,
-      is_marked_for_review: answer.isMarkedForReview || false,
-      answered_at: new Date().toISOString(),
-    }));
-
-    const { error: answersError } = await supabase
-      .from("user_grand_tests_answers")
-      .upsert(userAnswerInserts, { onConflict: "attempt_id,question_id" });
-
-    if (answersError) {
-      console.error("Answers upsert error:", answersError);
-      throw answersError;
-    }
-
+    // Find next section
     const nextSection = sectionTimes.find(
       (s: any) => s.section > sectionNumber && !s.is_submitted
     );
-    const isLastSection = !nextSection;
+
+    const isLastSection = !nextSection || sectionNumber >= examConfig.totalSections;
+
+    // If there's a next section, start its timer
     if (nextSection) {
       const nextSectionNumber = nextSection.section;
-      updatedSectionTimes = updatedSectionTimes.map((s: any) =>
-        s.section === nextSectionNumber
-          ? { ...s, start_time: new Date().toISOString() }
-          : s
-      );
+      updatedSectionTimes.forEach((s: any) => {
+        if (s.section === nextSectionNumber) {
+          s.start_time = new Date().toISOString();
+        }
+      });
     }
 
+    // Update attempt
     const { error: updateError } = await supabase
       .from("user_grand_tests_attempts")
       .update({
         section_times: updatedSectionTimes,
         current_section: isLastSection ? null : Number(sectionNumber) + 1,
-        is_completed: false,
-        submitted_at: null,
       })
       .eq("id", attemptId);
 
@@ -126,18 +100,13 @@ export async function POST(
       throw updateError;
     }
 
-    const { data, error } = await supabase.auth.updateUser({
-      data: {
-        current_section: isLastSection ? null : Number(sectionNumber) + 1,
-        is_completed: false,
-        submitted_at: null,
-      },
-});
-
+    console.log(`Section ${sectionNumber} submitted. Next section: ${nextSection?.section}, isLastSection: ${isLastSection}`);
+    console.log('Updated section times:', JSON.stringify(updatedSectionTimes, null, 2));
 
     return NextResponse.json({
       message: `Section ${sectionNumber} submitted successfully`,
       nextSection: nextSection?.section || null,
+      isLastSection,
     });
   } catch (error) {
     console.error("Error submitting section:", error);
