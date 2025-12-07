@@ -25,9 +25,9 @@ const FEATURED_ART = {
     id: "art-001",
     imageUrl: "https://images.unsplash.com/photo-1763668193311-0ba17bdea952?q=80&w=750&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     title: "Anatomy of a Dream",
-    artistName: "Dr. Sarah Jenkins",
+    artistName: "Dr. John Doe",
     artistCollege: "AIIMS, New Delhi",
-    artistNote: "I sketched this during my first year anatomy dissecting hall sessions. It represents the complexity and beauty of the human heart, not just as an organ, but as the center of our emotions and life.",
+    artistNote: "This is the artist's note.",
     likes: 124,
 };
 
@@ -52,7 +52,7 @@ export default function AuthArtShowcase() {
                 <img
                     src={FEATURED_ART.imageUrl}
                     alt={FEATURED_ART.title}
-                    className="h-full w-full object-cover transition-transform duration-[300ms] hover:scale-105"
+                    className="h-full w-full object-cover transition-transform hover:scale-105"
                 />
             </div>
 
