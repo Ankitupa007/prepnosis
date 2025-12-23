@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import UserHeader from "@/components/user-header";
 import BookmarkButton from "@/components/bookmark-button";
-import { Award, BookOpen, ChevronLeft, ChevronRight, ClipboardPlus, FileText, Play } from "lucide-react";
+import { Award, BookOpen, ChevronLeft, ChevronRight, ClipboardPlus, FileText, Play, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
@@ -431,7 +431,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
     const results = calculateResults();
 
     return (
-        <div className="container w-full mx-auto relative">
+        <div className="container w-full mx-auto relative min-h-screen">
             {testCompleted && !showReviewMode && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="w-full mx-auto px-6 max-w-2xl">
@@ -596,7 +596,7 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                         </div>
                     </div>
                 </div>
-                <div className="mx-auto flex justify-center w-full max-w-4xl px-2">
+                <div className="mx-auto flex justify-center w-full max-w-4xl px-2 pb-24"> {/* Added pb-24 for sticky bar padding */}
                     <div className="max-w-2xl w-full">
                         <Card className="shadow-none border-none">
                             <CardHeader>
@@ -604,13 +604,6 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                                     <p className="flex-1 text-xl font-semibold">
                                         {currentQuestionIndex + 1}. {currentQuestion.questions?.question_text || "Question not loaded"}
                                     </p>
-                                    <div className="flex-shrink-0">
-                                        <BookmarkButton
-                                            questionId={currentQuestion.questions?.id || ""}
-                                            size="sm"
-                                            variant="ghost"
-                                        />
-                                    </div>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -670,48 +663,6 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                                         })}
                                     </div>
                                 </RadioGroup>
-                                <div className="flex justify-between pt-4 border-t">
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={previousQuestion}
-                                            className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed"
-                                            disabled={currentQuestionIndex === 0}
-                                        >
-                                            <ChevronLeft className="h-4 w-4 mr-2" />
-                                            Previous
-                                        </button>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        {showReviewMode ? (
-                                            <button
-                                                onClick={nextQuestion}
-                                                className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold disabled:text-gray-400 disabled:cursor-not-allowed"
-                                                disabled={currentQuestionIndex === questions.length - 1}
-                                            >
-                                                Next
-                                                <ChevronRight className="h-4 w-4 ml-2" />
-                                            </button>
-                                        ) : currentQuestionIndex === questions.length - 1 ? (
-                                            <Button
-                                                onClick={submitTest}
-                                                disabled={isSubmitting}
-                                                className="bg-[#6FCCCA] hover:bg-[#6FCCCA]/60 font-bold text-white flex items-center gap-2"
-                                            >
-                                                {isSubmitting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                                                {isSubmitting ? "Submitting..." : "Submit Test"}
-                                            </Button>
-                                        ) : (
-                                            <button
-                                                onClick={nextQuestion}
-                                                className="flex items-center text-[#6FCCCA] bg-transparent shadow-none p-0 font-bold"
-                                                disabled={currentQuestionIndex === questions.length - 1 && test.test_mode === "regular"}
-                                            >
-                                                Next
-                                                <ChevronRight className="h-4 w-4 ml-2" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
                                 {shouldShowExplanation && currentQuestion.questions?.explanation && (
                                     <div className="mt-6 py-4 border-none rounded-lg w-full">
                                         <h4 className="font-medium text-sm uppercase text-foreground/30 mb-2">Explanation</h4>
@@ -729,6 +680,51 @@ export default function CustomTestPage({ params }: { params: Promise<{ id: strin
                                 )}
                             </CardContent>
                         </Card>
+                    </div>
+                </div>
+            </div >
+            {/* Sticky Bottom Navigation */}
+            <div className="fixed bottom-0 w-full right-0 bg-background/80 backdrop-blur-md border-t border-border py-4 px-6" >
+                <div className="mx-auto flex items-center justify-between">
+                    <button
+                        onClick={previousQuestion}
+                        className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        disabled={currentQuestionIndex === 0}
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                        PREVIOUS
+                    </button>
+
+                    <div className="flex items-center gap-6">
+                        <div className="rounded-full overflow-hidden border border-border/50 bg-card/50">
+                            <BookmarkButton
+                                questionId={currentQuestion.questions?.id || ""}
+                                showText
+                                size="sm"
+                                variant="ghost"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center">
+                        {currentQuestionIndex === questions.length - 1 ? (
+                            <Button
+                                onClick={submitTest}
+                                disabled={isSubmitting}
+                                className="bg-[#6FCCCA] hover:bg-[#6FCCCA]/90 text-white text-xs font-bold h-9 px-6 rounded-full shadow-lg shadow-[#6FCCCA]/20 transition-all active:scale-95 flex items-center gap-2"
+                            >
+                                {isSubmitting && <Loader2 className="w-3 h-3 animate-spin" />}
+                                FINISH TEST
+                            </Button>
+                        ) : (
+                            <button
+                                onClick={nextQuestion}
+                                className="flex items-center gap-2 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                            >
+                                NEXT
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

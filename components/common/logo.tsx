@@ -7,15 +7,15 @@ const Logo = ({ }) => {
       <Image
         src={"/logo.svg"}
         alt="Prepnosis Logo"
-        width={40}
-        height={40}
+        width={36}
+        height={36}
         priority
         draggable={false}
         loading="eager"
         unoptimized={true}
         fetchPriority="high"
         style={{ objectFit: "contain" }}
-        className="h-10 w-10 object-cover"
+        className="h-9 w-9 object-cover"
       />
     </Link>
     {/* <h1 className="font-bold text-xl text-[#6FCCCA]">prepnosis</h1> */}

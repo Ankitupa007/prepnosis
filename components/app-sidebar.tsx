@@ -25,6 +25,7 @@ import {
   Hexagon,
   Bookmark,
   User,
+  FileQuestionIcon,
 } from "lucide-react"
 import Logo from "./common/logo"
 import { ToggleTheme } from "./toggle-theme"
@@ -32,12 +33,14 @@ import Link from "next/link";
 import { logOut } from "@/app/(auth)/actions"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
+import { cn } from "@/lib/utils"
 
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Custom Tests", url: "/custom-test", icon: ClipboardPlus },
+  { title: "Custom Tests", url: "/custom-test", icon: FileQuestionIcon },
   { title: "Grand Tests", url: "/grand-tests", icon: FileText },
   { title: "Question Bank", url: "/qbank", icon: FileQuestion },
+  { title: "Case Builder", url: "/case-builder", icon: ClipboardPlus },
   { title: "Subject Polygons", url: "/polygons", icon: Hexagon },
   { title: "Bookmarks", url: "/bookmarks", icon: Bookmark },
 ]
@@ -46,7 +49,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { isMobile, setOpenMobile } = useSidebar()
+  const { isMobile, setOpenMobile, state } = useSidebar()
 
   const handleSignOut = async () => {
     try {
@@ -64,44 +67,56 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="">
-      <SidebarHeader className="border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between">
+    <Sidebar collapsible="icon" className="border-r border-border/50">
+      <SidebarHeader className="border-b border-border/50 px-0 py-4 min-h-[73px] flex items-center justify-center">
+        <div className="flex items-center justify-start w-full pl-4 gap-2">
           <Logo />
-          <ToggleTheme />
+          {state === "expanded" && <span className="text-3xl font-bold tracking-tight uppercase">Prepnosis</span>}
         </div>
+        {/* <ToggleTheme /> */}
       </SidebarHeader>
       <SidebarContent className="px-3 py-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
-            Navigation
+        <SidebarGroup className="px-0">
+          <SidebarGroupLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] px-4 mb-4 group-data-[collapsible=icon]:hidden">
+            Main Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-2">
               {navigationItems.map((item) => {
                 const isActive = pathname.startsWith(item.url)
 
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.title} className="flex justify-center">
                     <SidebarMenuButton
                       asChild
+                      isActive={isActive}
+                      tooltip={item.title}
                       onClick={() => isMobile && setOpenMobile(false)}
-                      className={`hover:bg-accent hover:text-accent-foreground transition-all duration-200 rounded-lg group ${isActive
-                        ? "bg-accent text-accent-foreground font-medium border border-accent-foreground/10 shadow-sm"
-                        : ""
-                        }`}
+                      className={cn(
+                        "transition-all duration-300 rounded-xl group h-12 w-full flex items-center justify-start px-3",
+                        "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+                        isActive
+                          ? "bg-primary/10 text-primary hover:bg-primary/15"
+                          : "hover:bg-accent hover:text-accent-foreground"
+                      )}
                     >
                       <Link
                         href={item.url}
-                        className="flex items-center gap-3 w-full py-4 relative"
+                        className="flex items-center gap-4 w-full"
                       >
-                        <item.icon
-                          className={`h-4 w-4 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-105"
-                            }`}
-                        />
-                        <span className="font-medium">{item.title}</span>
-                        {isActive && (
-                          <div className="absolute right-3 w-1.5 h-1.5 bg-primary rounded-full" />
+                        <div className="flex shrink-0 items-center justify-center">
+                          <item.icon
+                            className={cn(
+                              "h-[18px] w-[18px] transition-all duration-300",
+                              isActive ? "text-primary scale-100 stroke-[2.5px]" : "group-hover:scale-110"
+                            )}
+                          />
+                        </div>
+                        <span className={`font-semibold text-[14px] tracking-tight group-data-[collapsible=icon]:hidden whitespace-nowrap ${isActive ? "text-primary" : ""}`}>
+                          {item.title}
+                        </span>
+                        {isActive && state === "expanded" && (
+                          <div className="absolute right-3 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
                         )}
                       </Link>
                     </SidebarMenuButton>
@@ -113,47 +128,52 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
+      <SidebarFooter className="border-t border-border/50 p-2 bg-accent/5">
+        <SidebarMenu className="gap-1">
+          <SidebarMenuItem className="flex justify-center">
             <SidebarMenuButton
               asChild
-              className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200 rounded-lg"
+              tooltip="Profile"
+              className={cn(
+                "hover:bg-accent transition-all duration-200 rounded-xl h-11 w-full flex items-center justify-start px-3",
+                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+              )}
             >
-              <Link href="/profile" className="flex items-center gap-3">
-                <User className="h-4 w-4" />
-                <span>Profile</span>
+              <Link href="/profile" className="flex items-center gap-4">
+                <User className="h-18 w-18 shrink-0" />
+                <span className="group-data-[collapsible=icon]:hidden font-medium text-sm">Profile</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
+          <SidebarMenuItem className="flex justify-center">
             <SidebarMenuButton
               asChild
-              className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200 rounded-lg"
+              tooltip="Settings"
+              className={cn(
+                "hover:bg-accent transition-all duration-200 rounded-xl h-11 w-full flex items-center justify-start px-3",
+                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+              )}
             >
-              <Link href="/settings" className="flex items-center gap-3">
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
+              <Link href="/settings" className="flex items-center gap-4">
+                <Settings className="h-18 w-18 shrink-0" />
+                <span className="group-data-[collapsible=icon]:hidden font-medium text-sm">Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
+          <SidebarMenuItem className="flex justify-center">
             <SidebarMenuButton
+              tooltip="Sign Out"
               onClick={handleSignOut}
-              className="hover:bg-destructive/10 hover:text-destructive transition-colors duration-200 rounded-lg cursor-pointer w-full flex items-center gap-3"
+              className={cn(
+                "hover:bg-destructive/10 hover:text-destructive transition-all duration-200 rounded-xl h-11 w-full flex items-center justify-start px-3",
+                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+              )}
             >
-              <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
+              <LogOut className="h-18 w-18 shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden font-medium text-sm">Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
         </SidebarMenu>
-
-        <div className="mt-4 pt-4 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center">
-            Version 2.1.0 • Made with ❤️
-          </p>
-        </div>
       </SidebarFooter>
     </Sidebar>
   )

@@ -1,20 +1,21 @@
 // user-header.tsx
 "use client"
 import Link from "next/link"
-import {usePathname} from "next/navigation"
-import {SidebarTrigger} from "./ui/sidebar"
+import { usePathname } from "next/navigation"
+import { SidebarTrigger } from "./ui/sidebar"
 import UserAuthState from "./user-auth-state"
 import {
-    Breadcrumb,
-    BreadcrumbEllipsis,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
-import {Fragment} from "react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
+import { Fragment } from "react"
+import { ToggleTheme } from "./toggle-theme"
 
 // Configuration for custom breadcrumb labels and excluded paths
 const breadcrumbConfig = {
@@ -26,6 +27,8 @@ const breadcrumbConfig = {
     "/qbank": "Q Bank",
     "/profile": "Profile",
     "/settings": "Settings",
+    "/case-builder": "Case Builder",
+    "/case-builder/[caseId]": "Case Workspace",
     // Add more custom labels as needed
   } as Record<string, string>,
   // Paths to exclude from breadcrumbs (they won't show up)
@@ -161,6 +164,7 @@ const UserHeader = ({ text }: { text: string }) => {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <ToggleTheme />
             <UserAuthState />
           </div>
         </div>
